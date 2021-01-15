@@ -1,0 +1,608 @@
+import numpy as np
+import pandas as pd
+import math
+import random
+import string
+
+def random_partition(k, iterable):
+    results = [[] for i in range(k)]
+    for value in iterable:
+        x = random.randrange(k)
+        results[x].append(value)
+    return results
+
+def random_strings(k, rawchars):
+    results = ["" for i in range(k)]
+    for c in rawchars:
+        x = random.randrange(k)
+        results[x] += c
+    return results
+
+def get_morse_str(nchars=132, nwords=27, chars=None):
+    if not chars:
+        chars = string.ascii_uppercase + string.digits
+    rawchars = ''.join(random.choice(chars) for _ in range(nchars))
+    words = random_strings(nwords, rawchars)
+    morsestr = ' '.join(words)
+    return morsestr
+
+class Encoder:
+    def __init__(self, samples_per_dit, randomness):
+        self.sample_count = 0
+        self.samples_per_dit = samples_per_dit
+        self.randomness = randomness
+        
+    def add_dit(rows, samples_per_dit):
+        samples_per_dit = np.random.randint(-self.randomness, self.randomness+1) + self.samples_per_dit        
+        cols = {"env": 1.0, "dit": 1.0, "dah": 0.0, "ele": 0.0, "chr": 0.0, "wrd": 0.0}
+        for i in range(samples_per_dit):
+            rows.append(cols)
+            
+    def add_dah(rows, samples_per_dit):
+        samples_per_dit = np.random.randint(-self.randomness, self.randomness+1) + self.samples_per_dit        
+        cols = {"env": 1.0, "dit": 0.0, "dah": 1.0, "ele": 0.0, "chr": 0.0, "wrd": 0.0}
+        for i in range(3*samples_per_dit):
+            rows.append(cols)
+            
+    def add_ele(rows, samples_per_dit):
+        samples_per_dit = np.random.randint(-self.randomness, self.randomness+1) + self.samples_per_dit        
+        cols = {"env": 0.0, "dit": 0.0, "dah": 0.0, "ele": 1.0, "chr": 0.0, "wrd": 0.0}
+        for i in range(samples_per_dit):
+            rows.append(cols)
+
+    def add_chr(rows, samples_per_dit):
+        samples_per_dit = np.random.randint(-self.randomness, self.randomness+1) + self.samples_per_dit        
+        cols = {"env": 0.0, "dit": 0.0, "dah": 0.0, "ele": 0.0, "chr": 1.0, "wrd": 0.0}
+        for i in range(2*samples_per_dit):
+            rows.append(cols)
+
+    def add_wrd(rows, samples_per_dit):
+        samples_per_dit = np.random.randint(-self.randomness, self.randomness+1) + self.samples_per_dit        
+        cols = {"env": 0.0, "dit": 0.0, "dah": 0.0, "ele": 0.0, "chr": 0.0, "wrd": 1.0}
+        for i in range(4*samples_per_dit):
+            rows.append(cols)
+
+            
+class DecimEncoder:
+    def __init__(self, samples_per_dit, decim, randomness):
+        self.sample_count = 0
+        self.samples_per_dit = samples_per_dit
+        self.decim = decim # will retain 1 over decim samples
+        self.randomness = randomness
+        
+    def add_dit(self, rows):
+        samples_per_dit = np.random.randint(-self.randomness, self.randomness+1) + self.samples_per_dit
+        cols = {"env": 1.0, "dit": 1.0, "dah": 0.0, "ele": 0.0, "chr": 0.0, "wrd": 0.0}
+        for i in range(samples_per_dit):
+            if int(self.sample_count/self.decim) != int((self.sample_count+1)/self.decim): 
+                rows.append(cols)    
+            self.sample_count += 1
+        
+    def add_dah(self, rows):
+        samples_per_dit = np.random.randint(-self.randomness, self.randomness+1) + self.samples_per_dit
+        cols = {"env": 1.0, "dit": 0.0, "dah": 1.0, "ele": 0.0, "chr": 0.0, "wrd": 0.0}
+        for i in range(3*samples_per_dit):
+            if int(self.sample_count/self.decim) != int((self.sample_count+1)/self.decim):
+                rows.append(cols)
+            self.sample_count += 1
+            
+    def add_ele(self, rows):
+        samples_per_dit = np.random.randint(-self.randomness, self.randomness+1) + self.samples_per_dit
+        cols = {"env": 0.0, "dit": 0.0, "dah": 0.0, "ele": 1.0, "chr": 0.0, "wrd": 0.0}
+        for i in range(samples_per_dit):
+            if int(self.sample_count/self.decim) != int((self.sample_count+1)/self.decim):
+                rows.append(cols)
+            self.sample_count += 1
+
+    def add_chr(self, rows):
+        samples_per_dit = np.random.randint(-self.randomness, self.randomness+1) + self.samples_per_dit
+        cols = {"env": 0.0, "dit": 0.0, "dah": 0.0, "ele": 0.0, "chr": 1.0, "wrd": 0.0}
+        for i in range(2*samples_per_dit):
+            if int(self.sample_count/self.decim) != int((self.sample_count+1)/self.decim):
+                rows.append(cols)
+            self.sample_count += 1
+
+    def add_wrd(self, rows):
+        samples_per_dit = np.random.randint(-self.randomness, self.randomness+1) + self.samples_per_dit
+        cols = {"env": 0.0, "dit": 0.0, "dah": 0.0, "ele": 0.0, "chr": 0.0, "wrd": 1.0}
+        for i in range(4*samples_per_dit):
+            if int(self.sample_count/self.decim) != int((self.sample_count+1)/self.decim):
+                rows.append(cols)
+            self.sample_count += 1
+            
+    def add_dah2(self, rows):
+        samples_per_dit = np.random.randint(-self.randomness, self.randomness+1) + self.samples_per_dit
+        cols = {"env": 1.0, "dit": 1.0, "dah": 1.0, "ele": 0.0, "chr": 0.0, "wrd": 0.0}
+        for i in range(3*samples_per_dit):
+            if int(self.sample_count/self.decim) != int((self.sample_count+1)/self.decim):
+                rows.append(cols)
+            self.sample_count += 1
+            
+    def add_chr2(self, rows):
+        samples_per_dit = np.random.randint(-self.randomness, self.randomness+1) + self.samples_per_dit
+        cols = {"env": 0.0, "dit": 0.0, "dah": 0.0, "ele": 1.0, "chr": 1.0, "wrd": 0.0}
+        for i in range(2*samples_per_dit):
+            if int(self.sample_count/self.decim) != int((self.sample_count+1)/self.decim):
+                rows.append(cols)
+            self.sample_count += 1
+
+    def add_wrd2(self, rows):
+        samples_per_dit = np.random.randint(-self.randomness, self.randomness+1) + self.samples_per_dit
+        cols = {"env": 0.0, "dit": 0.0, "dah": 0.0, "ele": 1.0, "chr": 1.0, "wrd": 1.0}
+        for i in range(4*samples_per_dit):
+            if int(self.sample_count/self.decim) != int((self.sample_count+1)/self.decim):
+                rows.append(cols)
+            self.sample_count += 1
+
+class DecimEncoderStr:
+    def __init__(self, samples_per_dit, decim, alphabet, randomness):
+        self.sample_count = 0
+        self.samples_per_dit = samples_per_dit
+        self.decim = decim # will retain 1 over decim samples
+        self.alphabet = alphabet
+        self.randomness = randomness
+        
+    def add_dit(self, rows, ck):
+        samples_per_dit = np.random.randint(-self.randomness, self.randomness+1) + self.samples_per_dit
+        cols = {"env": 1.0, "dit": 1.0, "dah": 0.0, "ele": 0.0, "chr": 0.0, "wrd": 0.0}
+        alpha = {x: 1.0 if x == ck else 0.0 for x in self.alphabet}
+        cols = {**cols, **alpha}
+        for i in range(samples_per_dit):
+            if int(self.sample_count/self.decim) != int((self.sample_count+1)/self.decim): 
+                rows.append(cols)    
+            self.sample_count += 1
+        
+    def add_dah(self, rows, ck):
+        samples_per_dit = np.random.randint(-self.randomness, self.randomness+1) + self.samples_per_dit
+        cols = {"env": 1.0, "dit": 0.0, "dah": 1.0, "ele": 0.0, "chr": 0.0, "wrd": 0.0}
+        alpha = {x: 1.0 if x == ck else 0.0 for x in self.alphabet}
+        cols = {**cols, **alpha}
+        for i in range(3*samples_per_dit):
+            if int(self.sample_count/self.decim) != int((self.sample_count+1)/self.decim):
+                rows.append(cols)
+            self.sample_count += 1
+            
+    def add_ele(self, rows, ck):
+        samples_per_dit = np.random.randint(-self.randomness, self.randomness+1) + self.samples_per_dit
+        cols = {"env": 0.0, "dit": 0.0, "dah": 0.0, "ele": 1.0, "chr": 0.0, "wrd": 0.0}
+        alpha = {x: 1.0 if x == ck else 0.0 for x in self.alphabet}
+        cols = {**cols, **alpha}
+        for i in range(samples_per_dit):
+            if int(self.sample_count/self.decim) != int((self.sample_count+1)/self.decim):
+                rows.append(cols)
+            self.sample_count += 1
+
+    def add_chr(self, rows, ck):
+        samples_per_dit = np.random.randint(-self.randomness, self.randomness+1) + self.samples_per_dit
+        cols = {"env": 0.0, "dit": 0.0, "dah": 0.0, "ele": 0.0, "chr": 1.0, "wrd": 0.0}
+        alpha = {x: 1.0 if x == ck else 0.0 for x in self.alphabet}
+        cols = {**cols, **alpha}
+        for i in range(2*samples_per_dit):
+            if int(self.sample_count/self.decim) != int((self.sample_count+1)/self.decim):
+                rows.append(cols)
+            self.sample_count += 1
+
+    def add_wrd(self, rows, ck):
+        samples_per_dit = np.random.randint(-self.randomness, self.randomness+1) + self.samples_per_dit
+        cols = {"env": 0.0, "dit": 0.0, "dah": 0.0, "ele": 0.0, "chr": 0.0, "wrd": 1.0}
+        alpha = {x: 1.0 if x == ck else 0.0 for x in self.alphabet}
+        cols = {**cols, **alpha}
+        for i in range(4*samples_per_dit):
+            if int(self.sample_count/self.decim) != int((self.sample_count+1)/self.decim):
+                rows.append(cols)
+            self.sample_count += 1
+                        
+class DecimEncoderBlankStr:
+    def __init__(self, samples_per_dit, decim, alphabet, randomness):
+        self.sample_count = 0
+        self.samples_per_dit = samples_per_dit
+        self.decim = decim # will retain 1 over decim samples
+        self.alphabet = alphabet
+        self.randomness = randomness
+        
+    def add_dit(self, rows, ck):
+        samples_per_dit = np.random.randint(-self.randomness, self.randomness+1) + self.samples_per_dit
+        cols = {"env": 1.0, "dit": 1.0, "dah": 0.0, "ele": 0.0, "chr": 0.0, "wrd": 0.0, "blk": 1.0}
+        alpha = {x: 0.0 for x in self.alphabet}
+        cols = {**cols, **alpha}
+        for i in range(samples_per_dit):
+            if int(self.sample_count/self.decim) != int((self.sample_count+1)/self.decim): 
+                rows.append(cols)    
+            self.sample_count += 1
+        
+    def add_dah(self, rows, ck):
+        samples_per_dit = np.random.randint(-self.randomness, self.randomness+1) + self.samples_per_dit
+        cols = {"env": 1.0, "dit": 0.0, "dah": 1.0, "ele": 0.0, "chr": 0.0, "wrd": 0.0, "blk": 1.0}
+        alpha = {x: 0.0 for x in self.alphabet}
+        cols = {**cols, **alpha}
+        for i in range(3*samples_per_dit):
+            if int(self.sample_count/self.decim) != int((self.sample_count+1)/self.decim):
+                rows.append(cols)
+            self.sample_count += 1
+            
+    def add_ele(self, rows, ck):
+        samples_per_dit = np.random.randint(-self.randomness, self.randomness+1) + self.samples_per_dit
+        cols = {"env": 0.0, "dit": 0.0, "dah": 0.0, "ele": 1.0, "chr": 0.0, "wrd": 0.0, "blk": 1.0}
+        alpha = {x: 0.0 for x in self.alphabet}
+        cols = {**cols, **alpha}
+        for i in range(samples_per_dit):
+            if int(self.sample_count/self.decim) != int((self.sample_count+1)/self.decim):
+                rows.append(cols)
+            self.sample_count += 1
+
+    def add_chr(self, rows, ck):
+        samples_per_dit = np.random.randint(-self.randomness, self.randomness+1) + self.samples_per_dit
+        cols = {"env": 0.0, "dit": 0.0, "dah": 0.0, "ele": 0.0, "chr": 1.0, "wrd": 0.0, "blk": 0.0}
+        alpha = {x: 1.0 if x == ck else 0.0 for x in self.alphabet}
+        cols = {**cols, **alpha}
+        for i in range(2*samples_per_dit):
+            if int(self.sample_count/self.decim) != int((self.sample_count+1)/self.decim):
+                rows.append(cols)
+            self.sample_count += 1
+
+    def add_wrd(self, rows, ck):
+        samples_per_dit = np.random.randint(-self.randomness, self.randomness+1) + self.samples_per_dit
+        cols = {"env": 0.0, "dit": 0.0, "dah": 0.0, "ele": 0.0, "chr": 0.0, "wrd": 1.0, "blk": 1.0}
+        alpha = {x: 1.0 if x == ck else 0.0 for x in self.alphabet}
+        cols = {**cols, **alpha}
+        for i in range(4*samples_per_dit):
+            if int(self.sample_count/self.decim) != int((self.sample_count+1)/self.decim):
+                rows.append(cols)
+            self.sample_count += 1
+            
+class DecimEncoderTree:
+    def __init__(self, samples_per_dit, decim, alphabet, randomness):
+        self.sample_count = 0
+        self.samples_per_dit = samples_per_dit
+        self.decim = decim # will retain 1 over decim samples
+        self.alphabet = alphabet
+        self.randomness = randomness
+        self.state = "start"
+        self.morse_tree = {
+            "start": ("T", "E"),
+            "T": ("M", "N"),
+            "E": ("A", "I"),
+            "M": ("O", "G"),
+            "N": ("K", "D"),
+            "A": ("W", "R"),
+            "I": ("U", "S"),
+            "O": ("Odash", "Odit"),
+            "G": ("Q", "Z"),
+            "K": ("Y", "C"),
+            "D": ("X", "B"),
+            "W": ("J", "P"),
+            "R": (None, "L"),
+            "U": ("Udash", "F"),
+            "S": ("V", "H"),
+            "Odash": ("0", "9"),
+            "Odit": (None, "8"),
+            "Q": (None, None),
+            "Z": (None, "7"),
+            "Y": (None, None),
+            "C": (None, None),
+            "X": (None, None),
+            "B": (None, "6"),
+            "J": ("1", None),
+            "P": (None, None),
+            "L": (None, None),
+            "Udash": ("2", None),
+            "F": (None, None),
+            "V": ("3", None),
+            "H": ("4", "5"),
+            "0": (None, None),
+            "1": (None, None),
+            "2": (None, None),
+            "3": (None, None),
+            "4": (None, None),
+            "5": (None, None),
+            "6": (None, None),
+            "7": (None, None),
+            "8": (None, None),
+            "9": (None, None),
+        }
+        
+    def add_dit(self, rows):
+        samples_per_dit = np.random.randint(-self.randomness, self.randomness+1) + self.samples_per_dit
+        cols = {"env": 1.0, "dit": 1.0, "dah": 0.0, "ele": 0.0, "chr": 0.0, "wrd": 0.0, "nul": 0.0}
+        next_state = self.morse_tree[self.state][1] # right
+        if next_state is not None:
+            self.state = next_state
+            c = self.state if len(self.state) == 1 else ""
+        else:
+            c = ""
+        if c == "":
+            cols["nul"] = 1.0
+        alpha = {x: 1.0 if x == c else 0.0 for x in self.alphabet}
+        cols = {**cols, **alpha}
+        for i in range(samples_per_dit):
+            if int(self.sample_count/self.decim) != int((self.sample_count+1)/self.decim): 
+                rows.append(cols)    
+            self.sample_count += 1
+    
+    def add_dah(self, rows):
+        samples_per_dit = np.random.randint(-self.randomness, self.randomness+1) + self.samples_per_dit
+        cols = {"env": 1.0, "dit": 0.0, "dah": 1.0, "ele": 0.0, "chr": 0.0, "wrd": 0.0, "nul": 0.0}
+        next_state = self.morse_tree[self.state][0] # left
+        if next_state is not None:
+            self.state = next_state
+            c = self.state if len(self.state) == 1 else ""
+        else:
+            c = ""
+        if c == "":
+            cols["nul"] = 1.0
+        alpha = {x: 1.0 if x == c else 0.0 for x in self.alphabet}
+        cols = {**cols, **alpha}
+        for i in range(3*samples_per_dit):
+            if int(self.sample_count/self.decim) != int((self.sample_count+1)/self.decim):
+                rows.append(cols)
+            self.sample_count += 1
+    
+    def add_ele(self, rows):
+        samples_per_dit = np.random.randint(-self.randomness, self.randomness+1) + self.samples_per_dit
+        cols = {"env": 0.0, "dit": 0.0, "dah": 0.0, "ele": 1.0, "chr": 0.0, "wrd": 0.0, "nul": 0.0}
+        c = self.state if len(self.state) == 1 else ""
+        if c == "":
+            cols["nul"] = 1.0        
+        alpha = {x: 1.0 if x == c else 0.0 for x in self.alphabet}
+        cols = {**cols, **alpha}
+        for i in range(samples_per_dit):
+            if int(self.sample_count/self.decim) != int((self.sample_count+1)/self.decim):
+                rows.append(cols)
+            self.sample_count += 1
+
+    def add_chr(self, rows):
+        samples_per_dit = np.random.randint(-self.randomness, self.randomness+1) + self.samples_per_dit
+        cols = {"env": 0.0, "dit": 0.0, "dah": 0.0, "ele": 0.0, "chr": 1.0, "wrd": 0.0, "nul": 0.0}
+        c = self.state if len(self.state) == 1 else ""
+        if c == "":
+            cols["nul"] = 1.0        
+        alpha = {x: 1.0 if x == c else 0.0 for x in self.alphabet}
+        self.state = "start"
+        cols = {**cols, **alpha}
+        for i in range(2*samples_per_dit):
+            if int(self.sample_count/self.decim) != int((self.sample_count+1)/self.decim):
+                rows.append(cols)
+            self.sample_count += 1
+
+    def add_wrd(self, rows):
+        self.state = "start"
+        samples_per_dit = np.random.randint(-self.randomness, self.randomness+1) + self.samples_per_dit
+        cols = {"env": 0.0, "dit": 0.0, "dah": 0.0, "ele": 0.0, "chr": 0.0, "wrd": 1.0, "nul": 0.0}
+        alpha = {x: 0.0 for x in self.alphabet}
+        cols = {**cols, **alpha}
+        for i in range(4*samples_per_dit):
+            if int(self.sample_count/self.decim) != int((self.sample_count+1)/self.decim):
+                rows.append(cols)
+            self.sample_count += 1
+    
+            
+class Morse:
+    def __init__(self):
+        self.morsecode = {
+            '0': '-----',
+            '1': '.----',
+            '2': '..---',
+            '3': '...--',
+            '4': '....-',
+            '5': '.....',
+            '6': '-....',
+            '7': '--...',
+            '8': '---..',
+            '9': '----.',        
+            'A': '.-',
+            'B': '-...',
+            'C': '-.-.',
+            'D': '-..',
+            'E': '.',
+            'F': '..-.',
+            'G': '--.',
+            'H': '....',
+            'I': '..',
+            'J': '.---',
+            'K': '-.-',
+            'L': '.-..',
+            'M': '--',
+            'N': '-.',
+            'O': '---',
+            'P': '.--.',
+            'Q': '--.-',
+            'R': '.-.',
+            'S': '...',
+            'T': '-',
+            'U': '..-',
+            'V': '...-',
+            'W': '.--',
+            'X': '-..-',
+            'Y': '-.--',
+            'Z': '--..',    
+            '/': '-..-.',
+            '(': '-.--.',
+            '=': '-...-',
+            '+': '.-.-.',
+            'Á': '.--.-',
+            'Ä': '.-.-',
+            'É': '..-..',
+            'Ñ': '--.--',
+            'Ö': '---.',
+            'Ü': '..--',
+        }
+        self.alphabet = ''.join(self.morsecode.keys())
+        self.alphabet2 = 'ET'
+        self.alphabet6 = self.alphabet2 + 'MNAI'
+        self.alphabet14 = self.alphabet6 + 'OGKDWRUS'
+        self.alphabet26 = self.alphabet14 + 'QZYCXBJPLFVH'
+        self.alphabet36 = self.alphabet26 + '0123456789'
+
+    def _cws_to_cw(self, cws):
+        s=[]
+        for c in cws:
+            try: # try to find CW sequence from Codebook
+                s += self.morsecode[c]
+                s += ' '
+            except:
+                s += '_'
+                continue
+        return ''.join(s)        
+
+    def _morse_env(self, morse_code, samples_per_dit):
+        env = np.zeros(samples_per_dit)
+        for c in morse_code:
+            if c == '.': # dit
+                env = np.append(env, np.ones(samples_per_dit))
+            elif c == '-': # dah
+                env = np.append(env, np.ones(3*samples_per_dit))
+            elif c == ' ': # character separator
+                env = np.append(env, np.zeros(2*samples_per_dit))
+            elif c == '_': # word separaor
+                env = np.append(env, np.zeros(3*samples_per_dit))
+            env = np.append(env, np.zeros(samples_per_dit)) # element separator
+        return env
+
+    @staticmethod
+    def nb_samples_per_dit(Fs=8000, code_speed=20):
+        # One dit of time at w wpm is 1.2/w.
+        t_dit = 1.2 / code_speed
+        return int(t_dit * Fs)        
+
+    @staticmethod
+    def nb_samples_per_dit_decim(Fs=8000, code_speed=20, decim=5.77):
+        # One dit of time at w wpm is 1.2/w.
+        t_dit = 1.2 / code_speed
+        return int(t_dit * Fs), int(t_dit * Fs) / decim        
+
+    def _morse_df(self, morse_code, encoder):
+        rows = []
+        encoder.add_ele(rows, samples_per_dit)
+        for c in morse_code:
+            if c == '.': # dit
+                encoder.add_dit(rows)
+                encoder.add_ele(rows)
+            elif c == '-': # dah
+                encoder.add_dah(rows)
+                encoder.add_ele(rows)
+            elif c == ' ': # character separator
+                encoder.add_chr(rows)
+            elif c == '_': # word separaor
+                encoder.add_wrd(rows)
+        return pd.DataFrame(rows, columns=["env","dit","dah","ele","chr","wrd"])
+        
+    def _morse_df_decim(self, morse_code, decim_encoder):
+        rows = []
+        decim_encoder.add_ele(rows)
+        for c in morse_code:
+            if c == '.': # dit
+                decim_encoder.add_dit(rows)
+                decim_encoder.add_ele(rows)
+            elif c == '-': # dah
+                decim_encoder.add_dah(rows)
+                decim_encoder.add_ele(rows)
+            elif c == ' ': # character separator
+                decim_encoder.add_chr(rows)
+            elif c == '_': # word separaor
+                decim_encoder.add_wrd(rows)
+        return pd.DataFrame(rows, columns=["env","dit","dah","ele","chr","wrd"])
+        
+    def _morse_df_decim2(self, morse_code, decim, decim_encoder):
+        rows = []
+        decim_encoder.add_ele(rows)
+        for c in morse_code:
+            if c == '.': # dit
+                decim_encoder.add_dit(rows)
+                decim_encoder.add_ele(rows)
+            elif c == '-': # dah
+                decim_encoder.add_dah(rows)
+                decim_encoder.add_ele(rows)
+            elif c == ' ': # character separator
+                decim_encoder.add_chr2(rows)
+            elif c == '_': # word separaor
+                decim_encoder.add_wrd2(rows)
+        return pd.DataFrame(rows, columns=["env","dit","dah","ele","chr","wrd"])
+    
+    def _morse_df_decim_str(self, cws, decim_encoder):
+        rows = []
+        decim_encoder.add_ele(rows, ' ')
+        for c in cws:
+            ck = self.morsecode.get(c, '_')
+            for s in ck:
+                if s == '.': # dit
+                    decim_encoder.add_dit(rows, c)
+                    decim_encoder.add_ele(rows, c)
+                elif s == '-': # dah
+                    decim_encoder.add_dah(rows, c)
+                    decim_encoder.add_ele(rows, c)
+            if ck == '_':
+                decim_encoder.add_wrd(rows, ' ')
+            else:
+                decim_encoder.add_chr(rows, ' ')
+        cols=["env","dit","dah","ele","chr","wrd"] + [x for x in decim_encoder.alphabet]        
+        return pd.DataFrame(rows, columns=cols)
+                    
+    def _morse_df_decim_blk_str(self, cws, decim_encoder):
+        rows = []
+        decim_encoder.add_ele(rows, ' ')
+        for c in cws:
+            ck = self.morsecode.get(c, '_')
+            for s in ck:
+                if s == '.': # dit
+                    decim_encoder.add_dit(rows, c)
+                    decim_encoder.add_ele(rows, c)
+                elif s == '-': # dah
+                    decim_encoder.add_dah(rows, c)
+                    decim_encoder.add_ele(rows, c)
+            if ck == '_':
+                decim_encoder.add_wrd(rows, ' ')
+            else:
+                decim_encoder.add_chr(rows, c)
+        cols=["env","dit","dah","ele","chr","wrd","blk"] + [x for x in decim_encoder.alphabet]        
+        return pd.DataFrame(rows, columns=cols)
+                    
+    def _morse_df_decim_tree(self, morse_code, decim_encoder):
+        rows = []
+        decim_encoder.add_ele(rows)
+        for c in morse_code:
+            if c == '.': # dit
+                decim_encoder.add_dit(rows)
+                decim_encoder.add_ele(rows)
+            elif c == '-': # dah
+                decim_encoder.add_dah(rows)
+                decim_encoder.add_ele(rows)
+            elif c == ' ': # character separator
+                decim_encoder.add_chr(rows)
+            elif c == '_': # word separaor
+                decim_encoder.add_wrd(rows)
+        cols = ["env","dit","dah","ele","chr","wrd", "nul"] + [x for x in decim_encoder.alphabet]
+        return pd.DataFrame(rows, columns=cols)        
+        
+    def encode_env(self, cws, samples_per_dit):
+        cw = self._cws_to_cw(cws)
+        return self._morse_env(cw, samples_per_dit)
+    
+    def encode_df(self, cws, samples_per_dit, dit_randomness=0):
+        cw = self._cws_to_cw(cws)
+        encoder = Encoder(samples_per_dit, dit_randomness)
+        return self._morse_df(cw, encoder)
+    
+    def encode_df_decim(self, cws, samples_per_dit, decim, dit_randomness=0):
+        cw = self._cws_to_cw(cws)
+        decim_encoder = DecimEncoder(samples_per_dit, decim, dit_randomness)
+        return self._morse_df_decim(cw, decim_encoder)
+    
+    def encode_df_decim2(self, cws, samples_per_dit, decim, dit_randomness=0):
+        cw = self._cws_to_cw(cws)
+        decim_encoder = DecimEncoder(samples_per_dit, decim, dit_randomness)
+        return self._morse_df_decim2(cw, decim_encoder)
+
+    def encode_df_decim_str(self, cws, samples_per_dit, decim, alphabet, dit_randomness=0):
+        decim_encoder = DecimEncoderStr(samples_per_dit, decim, alphabet, dit_randomness)
+        return self._morse_df_decim_str(cws, decim_encoder)
+
+    def encode_df_decim_blk_str(self, cws, samples_per_dit, decim, alphabet, dit_randomness=0):
+        decim_encoder = DecimEncoderBlankStr(samples_per_dit, decim, alphabet, dit_randomness)
+        return self._morse_df_decim_blk_str(cws, decim_encoder)
+
+    def encode_df_decim_tree(self, cws, samples_per_dit, decim, alphabet, dit_randomness=0):
+        cw = self._cws_to_cw(cws)
+        decim_encoder = DecimEncoderTree(samples_per_dit, decim, alphabet, dit_randomness)
+        return self._morse_df_decim_tree(cw, decim_encoder)
+
+    
