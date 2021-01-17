@@ -428,10 +428,10 @@ class Morse:
         }
         self.alphabet = ''.join(self.morsecode.keys())
         self.alphabet2 = 'ET'
-        self.alphabet6 = self.alphabet2 + 'MNAI'
-        self.alphabet14 = self.alphabet6 + 'OGKDWRUS'
-        self.alphabet26 = self.alphabet14 + 'QZYCXBJPLFVH'
-        self.alphabet36 = self.alphabet26 + '0123456789'
+        self.alphabet6 = self.alphabet2 + 'IAMN' # 'MNAI'
+        self.alphabet14 = self.alphabet6 + 'SURWOGKD' # 'OGKDWRUS'
+        self.alphabet26 = self.alphabet14 + 'HVFLPJQZYCXB' # 'QZYCXBJPLFVH'
+        self.alphabet36 = self.alphabet26 + '5432109876' # '0123456789'
 
     def _cws_to_cw(self, cws):
         s=[]
