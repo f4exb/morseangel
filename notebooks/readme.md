@@ -85,6 +85,10 @@ The important point at this stage is that the labeling has changed. Basically it
 
 It proves to be significantly better that all previous character decoding tests. By gating the character lines with the character separator line (just a multiplication) one can find the right character as the one with the line having the maximum value. Spaces are simply given by the word separator line.
 
+#### RNN-Morse-chars-single
+
+Builds on `RNN-Morse-chars-dual` but does not use an intermedaite step. The labels dit and dahs are removed to train what is the character model in `RNN-Morse-chars-dual`. This proves to be slightly better than `RNN-Morse-chars-dual` in fact. As this is simpler it is now preferred over `RNN-Morse-chars-dual`.
+
 ### Drafts
 
   - `dataset.ipynb`: playing with Pandas datasets
