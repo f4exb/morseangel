@@ -375,7 +375,154 @@ class DecimEncoderTree:
                 rows.append(cols)
             self.sample_count += 1
     
+
+class DecimEncoderTreeSoft:
+    def __init__(self, samples_per_dit, decim, alphabet, ones, zeros, randomness):
+        self.sample_count = 0
+        self.samples_per_dit = samples_per_dit
+        self.decim = decim # will retain 1 over decim samples
+        self.alphabet = alphabet
+        self.ones = ones
+        self.zeros = zeros
+        self.randomness = randomness
+        self.state = "start"
+        self.morse_tree = {
+            "start": ("T", "E"),
+            "T": ("M", "N"),
+            "E": ("A", "I"),
+            "M": ("O", "G"),
+            "N": ("K", "D"),
+            "A": ("W", "R"),
+            "I": ("U", "S"),
+            "O": ("Odash", "Odit"),
+            "G": ("Q", "Z"),
+            "K": ("Y", "C"),
+            "D": ("X", "B"),
+            "W": ("J", "P"),
+            "R": (None, "L"),
+            "U": ("Udash", "F"),
+            "S": ("V", "H"),
+            "Odash": ("0", "9"),
+            "Odit": (None, "8"),
+            "Q": (None, None),
+            "Z": (None, "7"),
+            "Y": (None, None),
+            "C": (None, None),
+            "X": (None, None),
+            "B": (None, "6"),
+            "J": ("1", None),
+            "P": (None, None),
+            "L": (None, None),
+            "Udash": ("2", None),
+            "F": (None, None),
+            "V": ("3", None),
+            "H": ("4", "5"),
+            "0": (None, None),
+            "1": (None, None),
+            "2": (None, None),
+            "3": (None, None),
+            "4": (None, None),
+            "5": (None, None),
+            "6": (None, None),
+            "7": (None, None),
+            "8": (None, None),
+            "9": (None, None),
+        }
+        
+    def add_dit(self, rows):
+        samples_per_dit = np.random.randint(-self.randomness, self.randomness+1) + self.samples_per_dit
+        cols = {"env": 1.0, "ele": self.zeros[0], "chr": self.zeros[0], "wrd": self.zeros[0], "nul": self.zeros[0]}
+        next_state = self.morse_tree[self.state][1] # right
+        if next_state is not None:
+            self.state = next_state
+            c = self.state if len(self.state) == 1 else ""
+        else:
+            c = ""
+        if c == "":
+            cols["nul"] = self.ones[0]
+        alpha = {x: self.ones[0] if x == c else self.zeros[0] for x in self.alphabet}
+        cols = {**cols, **alpha}
+        for i in range(samples_per_dit):
+            if int(self.sample_count/self.decim) != int((self.sample_count+1)/self.decim): 
+                rows.append(cols)    
+            self.sample_count += 1
+    
+    def add_dah(self, rows):
+        samples_per_dit = np.random.randint(-self.randomness, self.randomness+1) + self.samples_per_dit
+        cols = {"env": 1.0, "ele": self.zeros[0], "chr": self.zeros[0], "wrd": self.zeros[0], "nul": self.zeros[0]}
+        next_state = self.morse_tree[self.state][0] # left
+        if next_state is not None:
+            self.state = next_state
+            c = self.state if len(self.state) == 1 else ""
+        else:
+            c = ""
+        if c == "":
+            cols["nul"] = self.ones[0]
+        alpha = {x: self.ones[0] if x == c else self.zeros[0] for x in self.alphabet}
+        cols = {**cols, **alpha}
+        for i in range(3*samples_per_dit):
+            if int(self.sample_count/self.decim) != int((self.sample_count+1)/self.decim):
+                rows.append(cols)
+            self.sample_count += 1
+    
+    def add_ele(self, rows):
+        samples_per_dit = np.random.randint(-self.randomness, self.randomness+1) + self.samples_per_dit
+        cols = {"env": 0.0, "ele": self.ones[1], "chr": self.zeros[1], "wrd": self.zeros[1], "nul": self.zeros[1]}
+        c = self.state if len(self.state) == 1 else ""
+        if c == "":
+            cols["nul"] = self.ones[1]        
+        alpha = {x: self.ones[1] if x == c else self.zeros[1] for x in self.alphabet}
+        cols = {**cols, **alpha}
+        for i in range(samples_per_dit):
+            if int(self.sample_count/self.decim) != int((self.sample_count+1)/self.decim):
+                rows.append(cols)
+            self.sample_count += 1
+
+    def add_chr(self, rows):
+        samples_per_dit = np.random.randint(-self.randomness, self.randomness+1) + self.samples_per_dit
+        cols = {"env": 0.0, "ele": self.zeros[1], "chr": self.ones[1], "wrd": self.zeros[1], "nul": self.zeros[1]}
+        c = self.state if len(self.state) == 1 else ""
+        if c == "":
+            cols["nul"] = self.ones[1]        
+        alpha = {x: self.ones[1] if x == c else self.zeros[1] for x in self.alphabet}
+        self.state = "start"
+        cols = {**cols, **alpha}
+        for i in range(2*samples_per_dit):
+            if int(self.sample_count/self.decim) != int((self.sample_count+1)/self.decim):
+                rows.append(cols)
+            self.sample_count += 1
+
+    def add_wrd(self, rows):
+        self.state = "start"
+        samples_per_dit = np.random.randint(-self.randomness, self.randomness+1) + self.samples_per_dit
+        cols = {"env": 0.0, "ele": self.zeros[0], "chr": self.zeros[0], "wrd": self.ones[0], "nul": self.zeros[0]}
+        alpha = {x: self.zeros[0] for x in self.alphabet}
+        cols = {**cols, **alpha}
+        for i in range(4*samples_per_dit):
+            if int(self.sample_count/self.decim) != int((self.sample_count+1)/self.decim):
+                rows.append(cols)
+            self.sample_count += 1
+
             
+class SoftMaxEq():
+    def __init__(self, N):
+        self.e = np.exp(1)
+        self.e_1 = 1/self.e
+        self.N = N
+        
+    def _den(self, n):
+        return n*self.e + (self.N-n)*self.e_1 if self.N > n else 1
+    
+    def on(self, n):
+        return self.e / self._den(n)
+
+    def off(self, n):
+        return self.e_1 / self._den(n)
+    
+    def scal(self):
+        return self._den(1) / self.e
+
+    
 class Morse:
     def __init__(self):
         self.morsecode = {
@@ -573,6 +720,23 @@ class Morse:
         cols = ["env","dit","dah","ele","chr","wrd", "nul"] + [x for x in decim_encoder.alphabet]
         return pd.DataFrame(rows, columns=cols)        
         
+    def _morse_df_decim_tree_soft(self, morse_code, decim_encoder):
+        rows = []
+        decim_encoder.add_ele(rows)
+        for c in morse_code:
+            if c == '.': # dit
+                decim_encoder.add_dit(rows)
+                decim_encoder.add_ele(rows)
+            elif c == '-': # dah
+                decim_encoder.add_dah(rows)
+                decim_encoder.add_ele(rows)
+            elif c == ' ': # character separator
+                decim_encoder.add_chr(rows)
+            elif c == '_': # word separaor
+                decim_encoder.add_wrd(rows)
+        cols = ["env","ele","chr","wrd", "nul"] + [x for x in decim_encoder.alphabet]
+        return pd.DataFrame(rows, columns=cols)        
+        
     def encode_env(self, cws, samples_per_dit):
         cw = self._cws_to_cw(cws)
         return self._morse_env(cw, samples_per_dit)
@@ -604,5 +768,20 @@ class Morse:
         cw = self._cws_to_cw(cws)
         decim_encoder = DecimEncoderTree(samples_per_dit, decim, alphabet, dit_randomness)
         return self._morse_df_decim_tree(cw, decim_encoder)
+
+    def encode_df_decim_tree_softmax(self, cws, samples_per_dit, decim, alphabet, dit_randomness=0):
+        cw = self._cws_to_cw(cws)
+        smeq = SoftMaxEq(len(alphabet) + 4)
+        zeros = [smeq.off(1), smeq.off(2)]
+        ones = [smeq.on(1), smeq.on(2)]
+        decim_encoder = DecimEncoderTreeSoft(samples_per_dit, decim, alphabet, ones, zeros, dit_randomness)
+        return self._morse_df_decim_tree_soft(cw, decim_encoder)
+
+    def encode_df_decim_tree_eqp(self, cws, samples_per_dit, decim, alphabet, dit_randomness=0):
+        cw = self._cws_to_cw(cws)
+        zeros = [0.0, 0.0]
+        ones = [1.0, 0.5]
+        decim_encoder = DecimEncoderTreeSoft(samples_per_dit, decim, alphabet, ones, zeros, dit_randomness)
+        return self._morse_df_decim_tree_soft(cw, decim_encoder)
 
     
