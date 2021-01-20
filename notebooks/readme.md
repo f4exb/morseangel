@@ -89,8 +89,15 @@ It proves to be significantly better that all previous character decoding tests.
 
 Builds on `RNN-Morse-chars-dual` but does not use an intermedaite step. The labels dit and dahs are removed to train what is the character model in `RNN-Morse-chars-dual`. This proves to be slightly better than `RNN-Morse-chars-dual` in fact. As this is simpler it is now preferred over `RNN-Morse-chars-dual`.
 
+Uses a reduced alphabet limited to 3 elements per Morse character thus 14 alpha characters: "ETIAMNSURWOGKD" 
+
+#### RNN-Morse-chars-single-full
+
+Builds on `RNN-Morse-chars-single` but uses a full 36 character (A..Z0..9) alphabet thus with up to 5 elements per character 
+
 ### Drafts
 
+  - `convolve.ipynb`: implementing moving average with numpy convolution
   - `dataset.ipynb`: playing with Pandas datasets
   - `gpu.ipynb`: GPU detection
   - `morse.ipynb`: playing with Morse generator
