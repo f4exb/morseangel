@@ -257,6 +257,7 @@ class DecimEncoderTree:
         self.decim = decim # will retain 1 over decim samples
         self.alphabet = alphabet
         self.randomness = randomness
+        self.exclusive = False # each label except envelope is exclusive among others (no overlaps)
         self.state = "start"
         self.morse_tree = {
             "start": ("T", "E"),
@@ -340,11 +341,13 @@ class DecimEncoderTree:
     def add_ele(self, rows):
         samples_per_dit = np.random.randint(-self.randomness, self.randomness+1) + self.samples_per_dit
         cols = {"env": 0.0, "dit": 0.0, "dah": 0.0, "ele": 1.0, "chr": 0.0, "wrd": 0.0, "nul": 0.0}
-        alpha = {x: 0.0 for x in self.alphabet}
-#         c = self.state if len(self.state) == 1 else ""
-#         if c == "":
-#             cols["nul"] = 1.0        
-#         alpha = {x: 1.0 if x == c else 0.0 for x in self.alphabet}
+        if self.exclusive:
+            alpha = {x: 0.0 for x in self.alphabet}
+        else:
+            c = self.state if len(self.state) == 1 else ""
+            if c == "":
+                cols["nul"] = 1.0        
+            alpha = {x: 1.0 if x == c else 0.0 for x in self.alphabet}
         cols = {**cols, **alpha}
         for i in range(samples_per_dit):
             if int(self.sample_count/self.decim) != int((self.sample_count+1)/self.decim):
@@ -354,11 +357,13 @@ class DecimEncoderTree:
     def add_chr(self, rows):
         samples_per_dit = np.random.randint(-self.randomness, self.randomness+1) + self.samples_per_dit
         cols = {"env": 0.0, "dit": 0.0, "dah": 0.0, "ele": 0.0, "chr": 1.0, "wrd": 0.0, "nul": 0.0}
-        alpha = {x: 0.0 for x in self.alphabet}
-#         c = self.state if len(self.state) == 1 else ""
-#         if c == "":
-#             cols["nul"] = 1.0        
-#         alpha = {x: 1.0 if x == c else 0.0 for x in self.alphabet}
+        if self.exclusive:
+            alpha = {x: 0.0 for x in self.alphabet}
+        else:
+            c = self.state if len(self.state) == 1 else ""
+            if c == "":
+                cols["nul"] = 1.0        
+            alpha = {x: 1.0 if x == c else 0.0 for x in self.alphabet}
         self.state = "start"
         cols = {**cols, **alpha}
         for i in range(2*samples_per_dit):
@@ -387,6 +392,7 @@ class DecimEncoderTreeSoft:
         self.ones = ones
         self.zeros = zeros
         self.randomness = randomness
+        self.exclusive = False # each label except envelope is exclusive among others (no overlaps)
         self.state = "start"
         self.morse_tree = {
             "start": ("T", "E"),
@@ -470,11 +476,13 @@ class DecimEncoderTreeSoft:
     def add_ele(self, rows):
         samples_per_dit = np.random.randint(-self.randomness, self.randomness+1) + self.samples_per_dit
         cols = {"env": 0.0, "ele": self.ones[1], "chr": self.zeros[1], "wrd": self.zeros[1], "nul": self.zeros[1]}
-        alpha = {x: self.zeros[0] for x in self.alphabet}
-#         c = self.state if len(self.state) == 1 else ""
-#         if c == "":
-#             cols["nul"] = self.ones[1]        
-#         alpha = {x: self.ones[1] if x == c else self.zeros[1] for x in self.alphabet}
+        if self.exclusive:
+            alpha = {x: self.zeros[0] for x in self.alphabet}
+        else:
+            c = self.state if len(self.state) == 1 else ""
+            if c == "":
+                cols["nul"] = self.ones[1]        
+            alpha = {x: self.ones[1] if x == c else self.zeros[1] for x in self.alphabet}
         cols = {**cols, **alpha}
         for i in range(samples_per_dit):
             if int(self.sample_count/self.decim) != int((self.sample_count+1)/self.decim):
@@ -484,10 +492,13 @@ class DecimEncoderTreeSoft:
     def add_chr(self, rows):
         samples_per_dit = np.random.randint(-self.randomness, self.randomness+1) + self.samples_per_dit
         cols = {"env": 0.0, "ele": self.zeros[1], "chr": self.ones[1], "wrd": self.zeros[1], "nul": self.zeros[1]}
-        c = self.state if len(self.state) == 1 else ""
-        if c == "":
-            cols["nul"] = self.ones[1]        
-        alpha = {x: self.ones[1] if x == c else self.zeros[1] for x in self.alphabet}
+        if self.exclusive:
+            alpha = {x: self.zeros[0] for x in self.alphabet}
+        else:
+            c = self.state if len(self.state) == 1 else ""
+            if c == "":
+                cols["nul"] = self.ones[1]        
+            alpha = {x: self.ones[1] if x == c else self.zeros[1] for x in self.alphabet}
         self.state = "start"
         cols = {**cols, **alpha}
         for i in range(2*samples_per_dit):
