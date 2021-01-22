@@ -660,10 +660,13 @@ class DecimEncoderVal:
         self.randomness = randomness
         self.elt_count = self.max_ele - 1
         self.val = 0
+        self.bias = 3**(self.max_ele-1) - 1
         
     def add_dit(self, rows):
         samples_per_dit = np.random.randint(-self.randomness, self.randomness+1) + self.samples_per_dit
-        cols = {"env": 1.0, "ele": 0.0, "chr": 0.0, "wrd": 0.0, "val": self.val}
+        self.val += 3**(self.elt_count)
+        val = self.val - self.bias
+        cols = {"env": 1.0, "ele": 0.0, "chr": 0.0, "wrd": 0.0, "val": val}
         self.elt_count -= 1
         for i in range(samples_per_dit):
             if int(self.sample_count/self.decim) != int((self.sample_count+1)/self.decim):
@@ -672,8 +675,9 @@ class DecimEncoderVal:
         
     def add_dah(self, rows):
         samples_per_dit = np.random.randint(-self.randomness, self.randomness+1) + self.samples_per_dit
-        self.val += 2**(self.elt_count)
-        cols = {"env": 1.0, "ele": 0.0, "chr": 0.0, "wrd": 0.0, "val": self.val}
+        self.val += 2*(3**(self.elt_count))
+        val = self.val - self.bias
+        cols = {"env": 1.0, "ele": 0.0, "chr": 0.0, "wrd": 0.0, "val": val}
         self.elt_count -= 1
         for i in range(3*samples_per_dit):
             if int(self.sample_count/self.decim) != int((self.sample_count+1)/self.decim):
@@ -682,7 +686,8 @@ class DecimEncoderVal:
 
     def add_ele(self, rows):
         samples_per_dit = np.random.randint(-self.randomness, self.randomness+1) + self.samples_per_dit
-        cols = {"env": 0.0, "ele": 1.0, "chr": 0.0, "wrd": 0.0, "val": self.val}
+        val = self.val - self.bias if self.val > 0 else 0
+        cols = {"env": 0.0, "ele": 1.0, "chr": 0.0, "wrd": 0.0, "val": val}
         for i in range(samples_per_dit):
             if int(self.sample_count/self.decim) != int((self.sample_count+1)/self.decim):
                 rows.append(cols)
@@ -690,8 +695,10 @@ class DecimEncoderVal:
             
     def add_chr(self, rows):
         samples_per_dit = np.random.randint(-self.randomness, self.randomness+1) + self.samples_per_dit
-        cols = {"env": 0.0, "ele": 0.0, "chr": 1.0, "wrd": 0.0, "val": self.val}
+        val = self.val - self.bias if self.val > 0 else 0
+        cols = {"env": 0.0, "ele": 0.0, "chr": 1.0, "wrd": 0.0, "val": val}
         self.elt_count = self.max_ele - 1
+        self.val = 0
         for i in range(2*samples_per_dit):
             if int(self.sample_count/self.decim) != int((self.sample_count+1)/self.decim):
                 rows.append(cols)
@@ -699,8 +706,10 @@ class DecimEncoderVal:
             
     def add_wrd(self, rows):
         samples_per_dit = np.random.randint(-self.randomness, self.randomness+1) + self.samples_per_dit
-        cols = {"env": 0.0, "ele": 0.0, "chr": 0.0, "wrd": 1.0, "val": self.val}
+        val = self.val - self.bias if self.val > 0 else 0
+        cols = {"env": 0.0, "ele": 0.0, "chr": 0.0, "wrd": 1.0, "val": val}
         self.elt_count = self.max_ele - 1
+        self.val = 0
         for i in range(4*samples_per_dit):
             if int(self.sample_count/self.decim) != int((self.sample_count+1)/self.decim):
                 rows.append(cols)
@@ -993,6 +1002,23 @@ class Morse:
         cols = cols + elep
         return pd.DataFrame(rows, columns=cols)        
                 
+    def _morse_df_decim_val(self, morse_code, decim_encoder):
+        rows = []
+        decim_encoder.add_ele(rows)
+        for c in morse_code:
+            if c == '.': # dit
+                decim_encoder.add_dit(rows)
+                decim_encoder.add_ele(rows)
+            elif c == '-': # dah
+                decim_encoder.add_dah(rows)
+                decim_encoder.add_ele(rows)
+            elif c == ' ': # character separator
+                decim_encoder.add_chr(rows)
+            elif c == '_': # word separaor
+                decim_encoder.add_wrd(rows)
+        cols = ["env","ele","chr","wrd","val"]
+        return pd.DataFrame(rows, columns=cols)        
+                
     def encode_env(self, cws, samples_per_dit):
         cw = self._cws_to_cw(cws)
         return self._morse_env(cw, samples_per_dit)
@@ -1049,3 +1075,8 @@ class Morse:
         cw = self._cws_to_cw(cws)
         decim_encoder = DecimEncoderOrd(samples_per_dit, decim, self.max_ele(alphabet), dit_randomness)
         return self._morse_df_decim_ord(cw, decim_encoder)    
+    
+    def encode_df_decim_val(self, cws, samples_per_dit, decim, alphabet, dit_randomness=0):
+        cw = self._cws_to_cw(cws)
+        decim_encoder = DecimEncoderVal(samples_per_dit, decim, self.max_ele(alphabet), dit_randomness)
+        return self._morse_df_decim_val(cw, decim_encoder)        
