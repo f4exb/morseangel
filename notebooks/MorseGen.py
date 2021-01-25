@@ -862,6 +862,19 @@ class Morse:
                 continue
         return ''.join(s)        
 
+    def cws_to_cwss(self, cws):
+        cwss = []
+        cws_words = cws.split(' ')
+        for cwsw in cws_words:
+            s = []
+            for c in cwsw:
+                cw = self.morsecode.get(c)
+                if cw:
+                    s.append(cw)
+            if s:
+                cwss.append(s)
+        return cwss
+    
     def _morse_env(self, morse_code, samples_per_dit):
         env = np.zeros(samples_per_dit)
         for c in morse_code:
@@ -1139,3 +1152,12 @@ class Morse:
         cw = self._cws_to_cw(cws)
         decim_encoder = DecimEncoderVal(samples_per_dit, decim, self.max_ele(alphabet), dit_randomness)
         return self._morse_df_decim_val(cw, decim_encoder)        
+    
+    def encode_df_decim_ord_morse(self, cwss, samples_per_dit, decim, max_elt, dit_randomness=0):
+        if not cwss:
+            cwss = get_morse_eles(max_elt=max_elt)
+        cws = cws = list(map(lambda x: ' '.join(x), cwss))
+        cw = ' _'.join(cws)
+        decim_encoder = DecimEncoderOrd(samples_per_dit, decim, max_elt, dit_randomness)
+        return self._morse_df_decim_ord(cw, decim_encoder)    
+        
