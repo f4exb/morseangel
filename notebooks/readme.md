@@ -95,6 +95,14 @@ Uses a reduced alphabet limited to 3 elements per Morse character thus 14 alpha 
 
 Builds on `RNN-Morse-chars-single` but uses a full 36 character (A..Z0..9) alphabet thus with up to 5 elements per character 
 
+### Morse sequence recognition
+
+It was found by chance that applying a minmax function to the final prediction would yield highly deterministic predictions with a squarish output waveform between 0 and 1. Various approaches on the labeling are attempted since not every one would yield to proper prediction. Maybe because of the minmax approach it is better if every label time sample form a one hot vector. The most successful variant so far is based on a sequential approach where labels are related to the relative position of the element i.e. first dit or first dah, second dit or second dah, etc... while maintaining the 3 separator labels: element, character and word. Soon in became clear that element length distinction between dit and dah would not work but taking just the sequence information i.e. first element, second element etc... yielded a fairly good de-noising of the element good enough to be able to post process it programmatically for distinction betweel short (dit) and long (dah).
+
+#### RNN-Morse-chars_single-ordNN
+
+Sequence recognition applied for various alphabet lengths (NN). The number of hidden nodes in the LSTM is critical to have enough of them to detect features and not too many to prevent enhancement of the model epoch after epoch without overfitting.
+
 ### Drafts
 
   - `convolve.ipynb`: implementing moving average with numpy convolution
