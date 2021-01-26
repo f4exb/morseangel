@@ -1,0 +1,295 @@
+A USERSE TRE USING EGGS TND GRAIN MONGO TST MADAME WOMDER WMOMA GOOD MAMA TSR WAS GREAT AAA
+AA USERS ARE UEING GGS ANTE ORAIN MONOO TST MADAMEWONDR WOMAS M OOKEMAMA USSR WAS OWEAI AAA
+
+final:   4 epochs loss: 0.0282
+CPU times: user 11min 54s, sys: 15.1 s, total: 12min 9s
+Wall time: 12min 5s
+
+
+SERRZ PORRD Y VRIND ZUR PARRIORS ARE XOING ZUICXRY AA
+HERRO WORRD MY FREXE ZURU WARRIORS ART COIUE QUICKRY AA
+
+
+final:   4 epochs loss: 0.0768
+CPU times: user 13min 5s, sys: 15.8 s, total: 13min 20s
+Wall time: 13min 16s
+
+
+final:   4 epochs loss: 0.0756
+CPU times: user 13min 8s, sys: 16.4 s, total: 13min 24s
+Wall time: 13min 20s
+
+26 char
+
+final:   4 epochs loss: 0.0967
+CPU times: user 32min 20s, sys: 38.6 s, total: 32min 59s
+Wall time: 32min 48s
+
+43.4746N 7.2454E IF6GLS TCP/IP Gateway F - I - 3A2 {UIV32N}
+
+final:   6 epochs loss: 0.0678
+CPU times: user 44min 11s, sys: 50.3 s, total: 45min 1s
+Wall time: 45min 10s
+
+6
+54 IELLO WORLD MY FRIND GUIU WARRIORS TRI COMHG QUICKLY A
+
+5.765625 2.8828125 10.378125 13.8375
+55 IELLO WORLD MY FRNIND ZULU WARRIORS ARI COMFG QUICKLY A
+
+6 epochs ~.0627
+
+122 F5SFU DE F4EXB R TNX RPT ES INFO ALEX RIG IS FTDX1200 PWR 100W ANT IS YAGI WX IS SUNNY ES WARM 32C HW AR F5SFU DE F4EXB KN
+(-17 dB / 7 dB)
+117 IFU DE F4EXB R NX RPN ES ENFO ALEX RIG IS FTDX100 WWR 1EEW ANN ES YAGI WX IS SUNNY ES WARM 32K HW AN FHSUU DE F4IXB K
+115 IFU DE U4EXB R TDX NPT S INFO ALX RIG IS FTDXJ200 PWR 30W ANT IS YAGI MH TS SUNDY S WARM 32C HW AR F5SFU DE R4EXB K
+117 IFU DE F4EXB R TNX RPT S INFO ALEX RIG IS RTDX100 PWR 100W ANT TS YAGI WX IS SUNNY TS MARM Ü2C HW AR F5SFU DE F4EXB K
+118 IFU DE F4EXB R TNX RPT ES INFO ALEX RIG IS FTDX1Ü00 GWR 100W TNT TS YAGI WX IS IUNNY S WARM V2C HW AR R5SFU DE FHEXB K
+
+130 F5SFU DE F4EXB = R TNX RPT ES INFO ALEX = RIG IS FTDX1200 PWR 100W ANT IS YAGI = WX IS SUNNY ES WARM 32C = HW AR F5SFU DE F4EXB KN
+(-17 dB / 7 dB)
+124 IFU DE F4EXB B R TDX RPT ES INFO ALEX X RIG IS FTDX120 GWR 100 WNT ES YAGI = WX IS IUNNY N WARG Ü2C = HW AR R5SFU DE F4EXB K
+127 IFU DE R4EXB B R TNX NPT ES INFO TLEX = RIG TS FTDX1200 PWN J00W ANT ES YAGI = WX IS SUNNY ES WART Ü2C B SW NR F5SFU DE F4EXB K
+(-13 dB / 11 dB)
+127 IFU DE F4EXB = R TNX RPT ES INFO ALEX = RIG IS FTDX1200 PWR 100W ANT IS YAGI = WX IS SUNNY ES WARM 32C = HW AR F5SFU DE F4EXB K
+
+
+final:   2 epochs loss: 0.0591
+CPU times: user 23min 14s, sys: 25 s, total: 23min 39s
+Wall time: 23min 32s
+
+(-17 dB / 7 dB)
+127 IFU D C4XB = R TNX RPT ES INFO ALEX = RIG SS FTDX1200 PWR 100W ANT IS YAGI = WX IS SUNNY ES WARM 3ÜC 6 HW AR FHSFU DE FHEEEXB K  <== take1
+126 IFU D C4XB = R TDX RPT ES SDFO RLEX X RSG SS FTDX1200 PWR 100W ADT II YAGS = MX IS SUDDY ES WRRG 3ÜC = HW RR FHSFU DI FHIEXB K   <== take2
+125 IFU D R4EXB X R TNX RPT ES INFO ALEX = RSG IS FTDXWM200 PWR 100W ANT S YAGSX E WX IS SUNNY I WARM ÜC = HW AR F5SFU DE F4EXB K   take1 all the way down
+123 IFU DE F4EXB = R TNB RPT I INFO ALX X RIG IS FTDX1Ü00 PWR 100W ANT IS YAGI = WX IS SUNNY EE WARM 32C = HW AR F5SFU D R4XB K
+122 IFU DE F4XB = R TNX RPT DINFO ALEX = RIG IS FTDX1Ü00 PWR JT0W ANT IS YAGI X WX IS HTNNY ES WARG V2C = HW AR F5SFU D R4XB K
+124 IFU D C4EXB = R TNX RPT ES INFOALIX = RIG IS FDX1200 PWR WM00A ANT IS YAGI = WX IS SUNNY I WARM 3OC = HW AR AHIFU DE F4EXB K
+(-13 dB / 11 dB)
+122 IFU D C4XB = R TNX RPT D INFO ALEX = RIG IS FDX1200 PWR 100W ANT IS YAGI = WX IS SUNNY D WARM 32C = HW ARE N5SFU D R4EXB K
+123 IFU D C4XB = R TNX RPT ES INFO ALEX = RIG IS FDX1200 PWR 100W ANT IS YAGI = WX IS SUNNY D WARM 32C = HW AR F5SFU DE F4EXB K
+123 IFU DE R4EXB = R TNX RPT D INFO ALX = RIG IS FTDX1200 PWR 100W AN NS YAGI = WX IS SUNNY ES WARM 32C = HW AR F5SFU DE F4XB K
+
+final:   1 epochs loss: 0.0576
+CPU times: user 11min 38s, sys: 12.8 s, total: 11min 51s
+Wall time: 11min 47s
+
+(-17 dB / 7 dB)
+127 IFU DE F4EXB = R TNX RPT ES SNFO ALIX = RIG IS FNDX1200 RWR J00W ANT IS YAGS = WX IS SUDNY ES WARM 32D B HW AR R5SFU DE F4EXB K
+127 IFU DE F4EXB B R TNX RPT ES INFO ALIX = RIG IS FTDXJ200 GWR 100W ANT IS YAGI = WX IS SUNDY ES WARM 32C = HW AR F5SFU DE F4EXB K
+126 IFU DI F4EXB = R TNX RPT ES IDFO ALEX = RIG ES FTDX1200 WWR 100W ANT S YAGS B WX IS SUNNY ES LARM 32C = HW RR FHSFU DE F4EXB K
+124 IFU DE F4XB X N TNX RPT ES IDFO TLEX = RIG IS FTDX1200 PWR 0W ANT SS YAGI = WX ES SUNNB ES WARM 3VC = HW AR FHSFU DE F4EXB K
+(-13 dB / 11 dB)
+125 IFU DE F4EXB = R TNX RPT ES INFO ALEX = RIG IS FTDX1200 PWR 10W ANT IS YAGI = WX IS SUNNY I WARG 32C = HW AR F5SFU DE F4EXB K
+125 IFU DE F4EXB = R TNX RPT ES INFO ALX = RIG IS RTDX1200 PWR 100W ANT IS YAGI = WX IS SUNNY ES WARM 32C = HW AR F5SFU DE F4XB K
+125 IFU DE F4XB = R TNX RPT ES INFO ALEX = RIG IS FTDX1200 GWR 100W ADT IS YAGI = WX IS SUNNY ES WARM 32C = HW AR F5SFU D R4EXB K
+124 IFU DE F4XB = R TNX RPT ES INFO ALX = RIG IS FTDX1200 PWR 100W ANT IS YAGI = WX IS SUNDY D WARM 32C = HW AR F5SFU DE F4EXB K
+
+
+final:   1 epochs loss: 0.0570
+CPU times: user 11min 42s, sys: 12.8 s, total: 11min 55s
+Wall time: 11min 51s
+
+
+final:   1 epochs loss: 0.0548
+CPU times: user 11min 45s, sys: 12.5 s, total: 11min 57s
+Wall time: 11min 54s
+
+1: 0.0704
+2: 0.0783
+3: 0.102
+4: 0.149
+
+final:   4 epochs loss: 0.1486
+CPU times: user 46min 50s, sys: 51.9 s, total: 47min 42s
+Wall time: 47min 28s
+
++2
+final:   2 epochs loss: 0.0850
+CPU times: user 10min 12s, sys: 11.2 s, total: 10min 23s
+Wall time: 10min 21s
+final:   2 epochs loss: 0.0821
+CPU times: user 10min 10s, sys: 11.3 s, total: 10min 21s
+Wall time: 10min 19s
+final:   2 epochs loss: 0.0812
+CPU times: user 10min 10s, sys: 10.7 s, total: 10min 20s
+Wall time: 10min 18s
+
+final:   2 epochs loss: 0.0906
+CPU times: user 10min 22s, sys: 11.3 s, total: 10min 33s
+Wall time: 10min 31s
+
+
+MorseBatchedLSTM(
+  (lstm): LSTM(1, 12)
+  (linear): Linear(in_features=12, out_features=6, bias=True)
+)
+final:   8 epochs loss: 0.0518
+CPU times: user 40min 10s, sys: 44.8 s, total: 40min 55s
+Wall time: 40min 45s
+
+
+
+final:  12 epochs loss: 0.0618
+CPU times: user 40min 25s, sys: 48 s, total: 41min 13s
+Wall time: 41min 1s
+
+
+final:  10 epochs loss: 0.0632
+CPU times: user 32min 58s, sys: 38.9 s, total: 33min 37s
+Wall time: 33min 27s
+
+morse_chr_milestones = [2, 6]
+final:  10 epochs loss: 0.0785
+CPU times: user 9min 46s, sys: 10.6 s, total: 9min 57s
+Wall time: 9min 54s
+
+morse_chr_milestones = [4, 8]
+final:  10 epochs loss: 0.0614
+CPU times: user 10min 21s, sys: 10.1 s, total: 10min 31s
+Wall time: 10min 28s
+
+morse_chr_milestones = [5, 10] (0.06 @ 10)
+final:  12 epochs loss: 0.0593
+CPU times: user 11min 9s, sys: 12.2 s, total: 11min 21s
+Wall time: 11min 18s
+final:   3 epochs loss: 0.0570
+CPU times: user 2min 50s, sys: 3.24 s, total: 2min 54s
+Wall time: 2min 53s
+final:   3 epochs loss: 0.0565
+CPU times: user 2min 51s, sys: 3.26 s, total: 2min 54s
+Wall time: 2min 53s
+final:   2 epochs loss: 0.0562
+CPU times: user 1min 54s, sys: 2.18 s, total: 1min 56s
+Wall time: 1min 56s
+final:   2 epochs loss: 0.0563
+CPU times: user 1min 54s, sys: 1.98 s, total: 1min 56s
+Wall time: 1min 56s
+final:   2 epochs loss: 0.0562
+CPU times: user 1min 54s, sys: 2.13 s, total: 1min 56s
+Wall time: 1min 56s
+
+MorseBatchedLSTM(
+  (lstm): LSTM(1, 12)
+  (linear): Linear(in_features=16, out_features=7, bias=True)
+)
+morse_chr_milestones = [5, 10] - regow at 5 and 10
+final:  12 epochs loss: 0.0627
+CPU times: user 30min 44s, sys: 33.6 s, total: 31min 18s
+Wall time: 31min 9s
+final:   2 epochs loss: 0.0634
+CPU times: user 5min 6s, sys: 5.72 s, total: 5min 12s
+Wall time: 5min 10s
+final:   2 epochs loss: 0.0626
+CPU times: user 5min 9s, sys: 5.94 s, total: 5min 15s
+Wall time: 5min 13s
+final:   2 epochs loss: 0.0626
+CPU times: user 5min 9s, sys: 5.67 s, total: 5min 15s
+Wall time: 5min 13s
+
+MorseBatchedLSTM(
+  (lstm): LSTM(1, 16)
+  (linear): Linear(in_features=16, out_features=7, bias=True)
+)
+morse_chr_milestones = [4, 9]
+final:  12 epochs loss: 0.0624
+CPU times: user 20min 9s, sys: 23.3 s, total: 20min 32s
+Wall time: 20min 26s
+
+MorseBatchedLSTM(
+  (lstm): LSTM(1, 20)
+  (linear): Linear(in_features=20, out_features=7, bias=True)
+)
+final:  12 epochs loss: 0.0547
+CPU times: user 20min 51s, sys: 23.8 s, total: 21min 15s
+Wall time: 21min 9s
+55 IELLO WORLD TK FRIEND ZULU WARRIORS ARE COMING QUCKLY A
+final:   2 epochs loss: 0.0548
+CPU times: user 3min 28s, sys: 4.24 s, total: 3min 33s
+Wall time: 3min 32s
+final:   2 epochs loss: 0.0545
+CPU times: user 3min 25s, sys: 3.85 s, total: 3min 28s
+Wall time: 3min 27s
+final:   2 epochs loss: 0.0548
+CPU times: user 3min 30s, sys: 3.95 s, total: 3min 34s
+Wall time: 3min 33s
+56 SELLO WORLD MY FRIEND ZULU WARRIORS TIE COMING QU_CKLY A
+
+
+MorseBatchedLSTM(
+  (lstm): LSTM(1, 50)
+  (linear): Linear(in_features=50, out_features=8, bias=True)
+)
+final:  16 epochs loss: 0.0418
+CPU times: user 35min 41s, sys: 39.3 s, total: 36min 20s
+Wall time: 36min 10s
+126 IFU DE F4EXB = R TNX RPT ES INFO ALEX = RIG IS FTD/1200 GW 10_W ANT IS 3AGI = WX IS SUNNY ES WARM 32C = HW AR F5SFU DE F4EXD K
+final:   4 epochs loss: 0.0402
+CPU times: user 8min 57s, sys: 9.29 s, total: 9min 7s
+Wall time: 9min 4s
+126 IFU DE F4EXB = R TNX RPT ES INFO ALE4 =RIG IS FTDXJ20_ PWR 100V ANT IS YAGI X WX IS SUNNY ES WARM 32C = HW AR R5SFU DE F4EXB K <= take 1
+126 IFU BE F4EKD = R TTX RPT ES ITFO ALEV XRIG IS FTDX1200 PWR 100V ANT ES YAGI = WX IS SUNNY EH PARM 32C = HW AR G5SFU DE U4EXB K <= take 2
+​final:   4 epochs loss: 0.0381 <== in fact it could be good to divide LR again by 2 at 20th epoch
+CPU times: user 8min 55s, sys: 9.62 s, total: 9min 4s
+Wall time: 9min 2s
+127 IFU DE F4EXB = R TNX RPT ES INFO ALE4 = RIG IS FTDX1200 PWR 100V ANT IS YAGI X WX IS SUNNY ES WARM 32C = HW AR R5SFU DE F4EXB K
+127 IFU TE F4EXD X R TTX RWT ES ITUÖ ALEV K NIM SI FTDX1200 PWR 100V ANT ES YAGI = WX IS IUNNY EH PARM 32C = HW AR G5SFU DE U4EXB K
+final:   4 epochs loss: 0.0351
+CPU times: user 8min 59s, sys: 9.74 s, total: 9min 9s
+Wall time: 9min 6s
+126 IFU DE F4EXB = R TNX RPT ES INFO ALE4 = RIG IS FTDX1200 PWR 100V ANT IS YAGI X WX IS SUNNY E GARM 32C = HW AR F5SFU DE F4EXB K
+126 SFU NE F4EKB X R TTX RPT ES ITFO TLE4 = NIG SS FTDX1200 PWR 100V ANT ES YAGI X MX ES SUNNY E ÖARM Ü2C = HW AR F5SFU BE A4EXB K
+final:   4 epochs loss: 0.0355
+CPU times: user 9min 2s, sys: 10.1 s, total: 9min 12s
+Wall time: 9min 10s
+126 IFU DE F4EXB = R TNX RPT ES INFO ALEU = RIG IS FTDX12__ PWR 100V ANT IS YAGI X WX IS SUNNY E GARM V2C = HW AR F5SFU DE F4EXB K
+126 IRU DE F4EXD X R TTX RPT ES INRO ALEW = GIM SS FTDX1200 PWR 100V ANT AS YAGI = MX IS IUNNY E ÖARM Ü2C = HW AR R5SFU DE U4EXB K
+
+decim=96
+With decim=128 Look back was 156 
+Samples per dit at 8000 Hz is 738. Decimation is 7.69. Look back is 208.
+MorseBatchedLSTM(
+  (lstm): LSTM(1, 18)
+  (linear): Linear(in_features=18, out_features=6, bias=True)
+)
+final:  12 epochs loss: 0.0444
+CPU times: user 20min 6s, sys: 18 s, total: 20min 24s
+Wall time: 20min 18s
+51 EON SINME SONGE ET MON MANTEAU KAKI EST TOUT KAKA A
+51 EON SINME SONGE ET MON MANTEAU KAKI EST TOUT KAKA A
+final:   4 epochs loss: 0.0433
+CPU times: user 6min 42s, sys: 6.47 s, total: 6min 48s
+Wall time: 6min 46s
+51 EON SINME SONGE _T MON MANTEAU KAKI EST TOUT KAKA A
+51 EON SINME SONGE _T MON MANTEAU KAKI EST TOUT KAKA A
+final:   4 epochs loss: 0.0431
+CPU times: user 6min 41s, sys: 6.04 s, total: 6min 47s
+Wall time: 6min 45s
+51 EON SINME SONGE ET MON MANTEAU KAKI EST TOUT KAKA A
+51 EON SINME SONGE ET MON MANTEAU KAKI EST TOUT KAKA A
+final:   4 epochs loss: 0.0423
+CPU times: user 6min 43s, sys: 6.07 s, total: 6min 49s
+Wall time: 6min 47s
+
+DUAL lstm
+MorseBatchedLSTM2(
+  (lstm): LSTM(1, 16, num_layers=2, dropout=0.2)
+  (linear): Linear(in_features=16, out_features=6, bias=True)
+)
+final:  12 epochs loss: 0.0412
+CPU times: user 27min 44s, sys: 24.7 s, total: 28min 9s
+Wall time: 28min 2s
+51 MON SINGE SONGE ET MON MANTEAU KAKI EST TOUT KAKA A
+51 MON SINGE SONGE ET MON MANTEAU KAKI EST TOUT KAKA A
+final:   4 epochs loss: 0.0394
+CPU times: user 9min 15s, sys: 8.06 s, total: 9min 23s
+Wall time: 9min 21s
+51 MON SINGE SONGE ET MON MANTEAU KAKI EST TOUT KAKA A
+51 MON SINGE SONGE ET MON MANTEAU KAKI EST TOUT KAKA A
+final:   4 epochs loss: 0.0382
+CPU times: user 9min 14s, sys: 7.99 s, total: 9min 22s
+Wall time: 9min 20s
+final:   4 epochs loss: 0.0355
+CPU times: user 9min 18s, sys: 8.16 s, total: 9min 27s
+Wall time: 9min 24s
+
