@@ -606,12 +606,12 @@ class DecimEncoderOrd:
         self.max_ele = max_ele
         self.randomness = randomness
         self.elt_count = 0
+        self.overlap_elt_sep = False # dah or dit overlap with element separator
         
     def add_dit(self, rows):
         samples_per_dit = np.random.randint(-self.randomness, self.randomness+1) + self.samples_per_dit
         cols = {"env": 1.0, "ele": 0.0, "chr": 0.0, "wrd": 0.0}
         elep = {f'e{i}': 1.0 if i == self.elt_count else 0.0 for i in range(self.max_ele)}
-        self.elt_count += 1
         cols = {**cols, **elep}
         for i in range(samples_per_dit):
             if int(self.sample_count/self.decim) != int((self.sample_count+1)/self.decim):
@@ -622,7 +622,6 @@ class DecimEncoderOrd:
         samples_per_dit = np.random.randint(-self.randomness, self.randomness+1) + self.samples_per_dit
         cols = {"env": 1.0, "ele": 0.0, "chr": 0.0, "wrd": 0.0}
         elep = {f'e{i}': 1.0 if i == self.elt_count else 0.0 for i in range(self.max_ele)}
-        self.elt_count += 1
         cols = {**cols, **elep}
         for i in range(3*samples_per_dit):
             if int(self.sample_count/self.decim) != int((self.sample_count+1)/self.decim):
@@ -632,7 +631,11 @@ class DecimEncoderOrd:
     def add_ele(self, rows):
         samples_per_dit = np.random.randint(-self.randomness, self.randomness+1) + self.samples_per_dit
         cols = {"env": 0.0, "ele": 1.0, "chr": 0.0, "wrd": 0.0}
-        elep = {f'e{i}': 0.0 for i in range(self.max_ele)}
+        if self.overlap_elt_sep :
+            elep = {f'e{i}': 1.0 if i == self.elt_count else 0.0 for i in range(self.max_ele)}
+        else:
+            elep = {f'e{i}': 0.0 for i in range(self.max_ele)}
+        self.elt_count += 1
         cols = {**cols, **elep}
         for i in range(samples_per_dit):
             if int(self.sample_count/self.decim) != int((self.sample_count+1)/self.decim):
@@ -1153,11 +1156,12 @@ class Morse:
         decim_encoder = DecimEncoderVal(samples_per_dit, decim, self.max_ele(alphabet), dit_randomness)
         return self._morse_df_decim_val(cw, decim_encoder)        
     
-    def encode_df_decim_ord_morse(self, cwss, samples_per_dit, decim, max_elt, dit_randomness=0):
+    def encode_df_decim_ord_morse(self, cwss, samples_per_dit, decim, max_elt, dit_randomness=0, overlap_elt_sep=False):
         if not cwss:
             cwss = get_morse_eles(max_elt=max_elt)
         cws = cws = list(map(lambda x: ' '.join(x), cwss))
         cw = ' _'.join(cws)
         decim_encoder = DecimEncoderOrd(samples_per_dit, decim, max_elt, dit_randomness)
+        decim_encoder.overlap_elt_sep = overlap_elt_sep
         return self._morse_df_decim_ord(cw, decim_encoder)    
         
