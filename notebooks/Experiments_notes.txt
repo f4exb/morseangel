@@ -293,3 +293,55 @@ final:   4 epochs loss: 0.0355
 CPU times: user 9min 18s, sys: 8.16 s, total: 9min 27s
 Wall time: 9min 24s
 
+== No minmax for 5 element Morse ===
+
++10 dB on envelope (-14dB)
+MorseBatchedLSTMStack(
+  (lstm): LSTM(1, 50, num_layers=2, dropout=0.2)
+  (linear): Linear(in_features=50, out_features=7, bias=True)
+)
+final:  12 epochs loss: 0.0086
+CPU times: user 24min 20s, sys: 16.1 s, total: 24min 36s
+Wall time: 24min 38s
+127 IFU  DI F4EXB =ER TNX RGT ES INFO ALEX = UIG IS FTNX120J GWR 100W ANNIHETAGI = WX IS SUNNO ES WARM 32C = SW AR F5SRF DE FSEXS
+
+Refining with + 7 dB (-17dB)
+starts at 0.0139 on 12th epoch
+final:  12 epochs loss: 0.0106
+CPU times: user 25min 5s, sys: 15.8 s, total: 25min 20s
+Wall time: 25min 22s
+129 IFU DE F4EXB = N TNX RPT ES INFO ALEX = RIG IS FTDX1200 PWR 100W ANT IS YAG I = WX IS SUNNY ES WARM 32G = HW AR F5SFU DE EN4EXB K
+
+Refining with minmax reloading previous weights
+final:   4 epochs loss: 0.0167
+CPU times: user 8min 21s, sys: 5.09 s, total: 8min 27s
+Wall time: 8min 27s
+epoch 28
+final:   4 epochs loss: 0.0167
+CPU times: user 8min 25s, sys: 5.25 s, total: 8min 31s
+Wall time: 8min 31s
+131 IFU DI F4EXB = R TNX RPT ES INFO ALEX = RIG IS FTDX1200 PWR 1TO0W ANT IS  YAG I = WX IS STNNY ES WARM 3ÜC = HW AR F5SFU DE EN4EXB K
+
+Now with -20 dB
+32
+final:   4 epochs loss: 0.0572
+CPU times: user 8min 18s, sys: 5.26 s, total: 8min 23s
+Wall time: 8min 24s
+final:   4 epochs loss: 0.0642
+CPU times: user 8min 31s, sys: 4.96 s, total: 8min 36s
+Wall time: 8min 37s
+diverging...
+
+Back to pre-minmax and refining with -20dB
+4
+Epoch [1/4]: 100%
+12038/12038 [02:12<00:00, 99.71it/s, loss=0.0667]
+Epoch [2/4]: 100%
+12038/12038 [02:10<00:00, 98.33it/s, loss=0.0574]
+Epoch [3/4]: 100%
+12038/12038 [02:08<00:00, 78.86it/s, loss=0.0599]
+Epoch [4/4]: 100%
+12038/12038 [02:10<00:00, 91.34it/s, loss=0.0461]
+final:   4 epochs loss: 0.0461
+CPU times: user 8min 36s, sys: 5.58 s, total: 8min 41s
+Wall time: 8min 42s
