@@ -1,0 +1,38 @@
+MorseBatchedLSTMStack(
+  (lstm): LSTM(1, 60, num_layers=2, dropout=0.1)
+  (linear): Linear(in_features=60, out_features=7, bias=True)
+)
+
+Direct to 7 dB - 5 element
+models/morse_ord36e96_mm07t2_model
+lr = 1e-4
+final:  12 epochs loss: 0.02499
+CPU times: user 16min 7s, sys: 11.6 s, total: 16min 19s
+Wall time: 16min 15s
+5e-5
+final:   1 epochs loss: 0.02068
+final:   1 epochs loss: 0.01939
+final:   1 epochs loss: 0.01854
+final:   1 epochs loss: 0.01805
+1e-5
+final:   6 epochs loss: 0.01437
+129 IFU DE F4EXB = R TNX RPT ES INFO ALEX = RIG IS FTDX1200 PAR 100W ANT IS YAGI = WX IS SUNNY ES WARM 3UTC = HW AR F5SFU DE IE4EXB K
+
+morse_ord36e96_mm04t2_model
+4 dB
+lr = 2e-5
+final:   6 epochs loss: 0.02803
+lr = 4e-5 - 4 and 5 elt only
+3 epochs ~0.02540
+final:   3 epochs loss: 0.02313
+1e-5
+final:   3 epochs loss: 0.02115
+127 IFU DE F4IXB = R TNX RPT ES INFO ALEX = RIG IS FTDX1200 PWR 100W RNT IS YRGI = WX IS SUNNY ES WRRM 32C = HW AR F5SFU DE F4EXB K
+5e-6
+final:   2 epochs loss: 0.02052
+final:   1 epochs loss: 0.02039
+final:   1 epochs loss: 0.02027
+final:   1 epochs loss: 0.02016
+final:   2 epochs loss: 0.01998
+127 IFU DE F4EXB = R TNX RPT ES INFO ALEX = RIG IS FTDX1200 PWR 100W ANT IS YAGI = WX IS SUNNY ES WARM 32C = HW AR F5SFU DE F4EXB K
+  F5SFU DE F4EXB = R TNX RPT ES INFO ALEX = RIG IS FTDX1200 PWR 100W ANT IS YAGI = WX IS SUNNY ES WARM 32C = HW AR F5SFU DE F4EXB KN

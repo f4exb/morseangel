@@ -26,12 +26,12 @@ def get_morse_str(nchars=132, nwords=27, chars=None):
     morsestr = ' '.join(words)
     return morsestr
 
-def get_morse_eles(nchars=132, nwords=27, max_elt=5):
+def get_morse_eles(nchars=132, nwords=27, min_elt=1, max_elt=5):
     neles = nchars*2
     raweles = ''.join(random.choice(".-") for _ in range(neles))
     morse_chars = []
     while len(raweles) > 0:
-        s = random.choice(list(range(1, max_elt+1)))
+        s = random.choice(list(range(min_elt, max_elt+1)))
         morse_chars.append(raweles[:s])
         raweles = raweles[s:]
     return random_partition(nwords, morse_chars)

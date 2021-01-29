@@ -1,0 +1,4 @@
+MorseBatchedLSTM(
+  (lstm): LSTM(1, 15)
+  (linear): Linear(in_features=15, out_features=8, bias=True)
+)
