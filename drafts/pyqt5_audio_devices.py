@@ -1,5 +1,6 @@
 import sys
 from PyQt5 import QtCore, QtWidgets, QtGui, QtMultimedia
+from PyQt5.QtCore import Qt, pyqtSignal
 import matplotlib.pyplot as plt
 from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg, NavigationToolbar2QT
 from matplotlib.figure import Figure
@@ -19,13 +20,29 @@ def print_devices(devices):
 def specimg(Fs, signal, tone, nfft, noverlap, wbins, complex=False):
     """ Create spectral image around tone frequency
     """
-    nperseg = nfft if nfft < 256 else 256
+    nperseg = nfft if nfft < 256 or noverlap >= 256 else 256
+
     f, t, Sxx = spectrogram(signal, Fs, nfft=nfft, noverlap=noverlap, nperseg=nperseg, scaling='density')
     fbin = (tone/(Fs/2))* (len(f)-1)
     if complex:
         fbin /= 2
     center_bin = int(round(fbin))
     return f[center_bin-wbins:center_bin+wbins+1], t, Sxx[center_bin-wbins:center_bin+wbins+1,:]
+
+def nb_samples_per_dit_decim(Fs=8000, code_speed=13, decim=7.69):
+    """ One dit of time at w wpm is 1.2/w.
+        Returns a tuple (raw samples per dit, expected decimation factor)
+        Overlap is nfft - decimation factor
+    """
+    t_dit = 1.2 / code_speed
+    return int(t_dit * Fs), int(t_dit * Fs) / decim  
+
+def fft_optim(Fs=8000, code_speed=13, decim=7.69):
+    spd, fft_decim = nb_samples_per_dit_decim(Fs, code_speed, decim)
+    log2_spd = np.log(spd) / np.log(2)
+    nfft = 2**int(log2_spd-1)
+    noverlap = nfft - round(fft_decim)
+    return nfft, noverlap
 
 class TestFigure(object):
     def __init__(self, parent):
@@ -91,6 +108,39 @@ class MplPeakCanvas(FigureCanvasQTAgg):
         self.fig.suptitle(f"Signal peak {10*np.log10(pmax):5.2f} dB found at {tone:9.5f} Hz")
         self.draw()
 
+class ControlWidget(QtWidgets.QWidget):
+
+    wpmSignal = pyqtSignal(int)
+    
+    def __init__(self, *args, **kwargs):
+        super(ControlWidget, self).__init__(*args, **kwargs)
+        vbox = QtWidgets.QVBoxLayout()
+        hl1 = QtWidgets.QHBoxLayout()
+        self.wpmLabel = QtWidgets.QLabel(self)
+        self.wpmLabel.setText("WPM")
+        self.wpm = QtWidgets.QSlider(Qt.Horizontal)
+        self.wpm.setMinimum(1)
+        self.wpm.setMaximum(40)
+        self.wpm.setSingleStep(1)
+        self.wpm.setPageStep(1)
+        self.wpm.setValue(17)
+        self.wpm.valueChanged.connect(self.wpmChange)
+        self.wpmText = QtWidgets.QLabel(self)
+        self.wpmText.setText("17")
+        hl1.addWidget(self.wpmLabel)
+        hl1.addWidget(self.wpm)
+        hl1.addWidget(self.wpmText)
+        hl1_widget = QtWidgets.QWidget()
+        hl1_widget.setLayout(hl1)
+        self.vbox = QtWidgets.QVBoxLayout()
+        self.vbox.addWidget(hl1_widget)
+        self.setLayout(self.vbox)
+
+    def wpmChange(self):
+        wpm = self.wpm.value()
+        self.wpmText.setText(str(wpm))
+        self.wpmSignal.emit(wpm)
+
 
 class MainWindow(QtWidgets.QMainWindow):
 
@@ -105,8 +155,10 @@ class MainWindow(QtWidgets.QMainWindow):
         self.audio_bytes = None
         self.peak_signal = np.zeros((1024*32*2))
         self.peak_signal_index = 0
-        self.nfft = 128 # 256,220
-        self.noverlap = 56
+        self.wpm = 17
+        self.nfft = 256
+        self.noverlap = 183
+        self.nperseg = 256
         self.initUI()
 
     def initUI(self):
@@ -128,30 +180,45 @@ class MainWindow(QtWidgets.QMainWindow):
         audioMenu.addAction(audioAct)
 
         vbox = QtWidgets.QVBoxLayout()
-        hbox = QtWidgets.QHBoxLayout()
+        hbo1 = QtWidgets.QHBoxLayout()
         self.sc_time = MplTimeCanvas(self, width=5, height=3, dpi=100)
         self.sc_peak = MplPeakCanvas(self, width=5, height=3, dpi=100)
+        self.controls = ControlWidget()
+        self.controls.wpmSignal.connect(self.wpmChange)
+        hbo1.addWidget(self.sc_time)
+        hbo1.addWidget(self.sc_peak)
+        hbo1.addWidget(self.controls)
+        hbo2 = QtWidgets.QHBoxLayout()
         self.sc_tenv = MplTimeCanvas(self, width=5, height=3, dpi=100)
-        hbox.addWidget(self.sc_time)
-        hbox.addWidget(self.sc_peak)
-        top_widget = QtWidgets.QWidget()
-        top_widget.setLayout(hbox)
-        vbox.addWidget(top_widget)
-        vbox.addWidget(self.sc_tenv)
+        self.sc_zenv = MplTimeCanvas(self, width=5, height=3, dpi=100)
+        hbo2.addWidget(self.sc_tenv, 2)
+        hbo2.addWidget(self.sc_zenv, 1)
+        hbo1_widget = QtWidgets.QWidget()
+        hbo1_widget.setLayout(hbo1)
+        hbo2_widget = QtWidgets.QWidget()
+        hbo2_widget.setLayout(hbo2)
+        vbox.addWidget(hbo1_widget)
+        vbox.addWidget(hbo2_widget)
         widget = QtWidgets.QWidget()
         widget.setLayout(vbox)
         self.setCentralWidget(widget)
 
-        self.setGeometry(100, 100, 800, 300)
+        self.setGeometry(100, 100, 1400, 500)
         self.setWindowTitle('MorseAngel')
         self.show()
 
         self.initTEnv()
+        self.initZEnv()
 
     def initTEnv(self):
         tenv_size = (1024*32//(self.nfft-self.noverlap)) * 1
         self.sc_tenv.set_mp(tenv_size)
         print(f"Init tenv {tenv_size}")
+
+    def initZEnv(self):
+        zenv_size = 50
+        self.sc_zenv.set_mp(zenv_size)
+        print(f"Init zenv {zenv_size}")
 
     def openAudioDialog(self, audio_devices): # Opening a new popup window...
         self.audio_dialog = audiodialog.AudioDialog()
@@ -165,6 +232,11 @@ class MainWindow(QtWidgets.QMainWindow):
             self.set_audio_device()
         elif self.a == self.audio_dialog.Rejected: #0
             print("Rejected")
+
+    def wpmChange(self, wpm):
+        self.wpm = wpm
+        self.nfft, self.noverlap = fft_optim(Fs=self.audio_rate, code_speed=self.wpm)
+        print(f"FFT {self.nfft} with overlap {self.noverlap}")
 
     def set_audio_device(self):
         format = QtMultimedia.QAudioFormat()
@@ -182,6 +254,8 @@ class MainWindow(QtWidgets.QMainWindow):
             print("Init Audio")
         self.audio_input = QtMultimedia.QAudioInput(self.audio_device, format)
         self.audio_nsamples = self.audio_rate//2
+        self.nfft, self.noverlap = fft_optim(Fs=self.audio_rate, code_speed=self.wpm)
+        print(f"FFT {self.nfft} with overlap {self.noverlap}")
         self.sc_time.set_mp(self.audio_nsamples)
         self.sc_peak.set_mp()
         self.audio_input.setBufferSize(self.audio_nsamples)
@@ -209,11 +283,26 @@ class MainWindow(QtWidgets.QMainWindow):
                         nside_bins = 1
                         f, t, img = specimg(self.audio_rate, self.peak_signal[:1024*32], tone, self.nfft, self.noverlap, nside_bins)
                         print(t.shape, f)
-                        img_line = np.sum(img, axis=0)
-                        img_line /= max(img_line)
-                        self.sc_tenv.new_data(img_line)
+                        if len(f) != 0:
+                            img_line = np.sum(img, axis=0)
+                            img_line /= max(img_line)
+                            self.test_line(img_line, 0.75)
+                            self.sc_tenv.new_data(img_line)
+                            self.sc_zenv.new_data(img_line[:50])
                     self.peak_signal = np.roll(self.peak_signal, 1024*32, axis=0)
                     self.peak_signal_index -= 1024*32
+
+    @staticmethod
+    def test_line(img_line, thr):
+        count = 0
+        hist = {}
+        for x in img_line:
+            if x > thr:
+                count += 1
+            elif count != 0:
+                hist[count] = hist.setdefault(count, 0) + 1
+                count = 0
+        print(dict(sorted(hist.items(), key=lambda item: item[1], reverse=True)))
 
 
 def main():
