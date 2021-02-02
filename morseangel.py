@@ -45,6 +45,28 @@ def fft_optim(Fs=8000, code_speed=13, decim=7.69):
     noverlap = nfft - round(fft_decim)
     return nfft, noverlap
 
+def make_palette():
+    palette = QPalette()
+    palette.setColor(QPalette.Window, QColor(53,53,53))
+    palette.setColor(QPalette.WindowText, Qt.white)
+    palette.setColor(QPalette.Base, QColor(25,25,25))
+    palette.setColor(QPalette.AlternateBase, QColor(53,53,53))
+    palette.setColor(QPalette.ToolTipBase, Qt.white)
+    palette.setColor(QPalette.ToolTipText, Qt.black)
+    palette.setColor(QPalette.Text, Qt.white)
+    palette.setColor(QPalette.Button, QColor(0x40, 0x40, 0x40))
+    palette.setColor(QPalette.ButtonText, Qt.white)
+    palette.setColor(QPalette.BrightText, Qt.red)
+    palette.setColor(QPalette.Light, QColor(53,53,53).lighter(125).lighter())
+    palette.setColor(QPalette.Mid, QColor(53,53,53).lighter(125))
+    palette.setColor(QPalette.Dark, QColor(53,53,53).lighter(125).darker())
+    palette.setColor(QPalette.Link, QColor(0,0xa0,0xa0))
+    palette.setColor(QPalette.LinkVisited, QColor(0,0xa0,0xa0).lighter())
+    palette.setColor(QPalette.Highlight, QColor(0xff, 0x8c, 0x00))
+    palette.setColor(QPalette.HighlightedText, Qt.black)
+    return palette
+
+
 class TestFigure(object):
     def __init__(self, parent):
         self.figure = plt.figure(facecolor='white')
@@ -152,34 +174,7 @@ class MainWindow(QtWidgets.QMainWindow):
         self.predictions = predictions.Predictions()
         self.initUI()
 
-    def set_palette(self):
-        """ Make same theme as SDRangel
-        """
-        self.palette = self.palette()
-        self.palette.setColor(QPalette.Window, QColor(53,53,53))
-        self.palette.setColor(QPalette.WindowText, Qt.white)
-        self.palette.setColor(QPalette.Base, QColor(25,25,25))
-        self.palette.setColor(QPalette.AlternateBase, QColor(53,53,53))
-        self.palette.setColor(QPalette.ToolTipBase, Qt.white)
-        self.palette.setColor(QPalette.ToolTipText, Qt.black)
-        self.palette.setColor(QPalette.Text, Qt.white)
-        self.palette.setColor(QPalette.Button, QColor(0x40, 0x40, 0x40))
-        self.palette.setColor(QPalette.ButtonText, Qt.white)
-        self.palette.setColor(QPalette.BrightText, Qt.red)
-
-        self.palette.setColor(QPalette.Light, QColor(53,53,53).lighter(125).lighter())
-        self.palette.setColor(QPalette.Mid, QColor(53,53,53).lighter(125))
-        self.palette.setColor(QPalette.Dark, QColor(53,53,53).lighter(125).darker())
-
-        self.palette.setColor(QPalette.Link, QColor(0,0xa0,0xa0))
-        self.palette.setColor(QPalette.LinkVisited, QColor(0,0xa0,0xa0).lighter())
-        self.palette.setColor(QPalette.Highlight, QColor(0xff, 0x8c, 0x00))
-        self.palette.setColor(QPalette.HighlightedText, Qt.black)
-
-        self.setPalette(self.palette)
-
     def initUI(self):
-        self.set_palette()
         plt.style.use('dark_background')
         exitAct = QtWidgets.QAction('&Exit', self)
         exitAct.setShortcut('Ctrl+Q')
@@ -344,6 +339,7 @@ class MainWindow(QtWidgets.QMainWindow):
 
 def main():
     app = QtWidgets.QApplication(sys.argv)
+    app.setPalette(make_palette())
     w = MainWindow()
     sys.exit(app.exec_())
 
