@@ -6,7 +6,7 @@ from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg, NavigationTool
 from matplotlib.figure import Figure
 import numpy as np
 from scipy.signal import periodogram, spectrogram
-import audiodialog, controls
+import audiodialog, controls, predictions
 sys.path.append('./notebooks')
 from peakdetect import peakdet
 
@@ -147,6 +147,7 @@ class MainWindow(QtWidgets.QMainWindow):
         self.noverlap = 183
         self.nperseg = 256
         self.thr = 1e-9
+        self.predictions = predictions.Predictions()
         self.initUI()
 
     def initUI(self):
@@ -171,8 +172,8 @@ class MainWindow(QtWidgets.QMainWindow):
 
         vbox = QtWidgets.QVBoxLayout()
         hbo1 = QtWidgets.QHBoxLayout()
-        self.sc_time = MplTimeCanvas(self, width=5, height=3, dpi=100)
-        self.sc_peak = MplPeakCanvas(self, width=5, height=3, dpi=100)
+        self.sc_time = MplTimeCanvas(self, width=5, height=2, dpi=100)
+        self.sc_peak = MplPeakCanvas(self, width=4.5, height=2, dpi=100)
         self.controls = controls.ControlWidget()
         self.controls.wpmSignal.connect(self.wpmChange)
         self.controls.thrSignal.connect(self.thrChange)
@@ -268,8 +269,9 @@ class MainWindow(QtWidgets.QMainWindow):
             buffer_bytes = buffer_bytes[:self.audio_nsamples*self.audio_bytes] # truncate
             data = np.frombuffer(buffer_bytes, dtype=np.single)
             if max(data) > 0:
-                #print(max(data))
+                #print(type(data), data.shape)
                 data /= max(data)
+                self.predictions.new_data(data)
                 self.sc_time.new_data(data)
                 nb_samples = len(buffer_bytes) // self.audio_bytes
                 self.peak_signal[self.peak_signal_index:self.peak_signal_index+nb_samples] = data
@@ -288,7 +290,7 @@ class MainWindow(QtWidgets.QMainWindow):
                         if len(f) != 0:
                             img_line = np.sum(img, axis=0)
                             img_line /= max(img_line)
-                            self.test_line(img_line, 0.75)
+                            #self.test_line(img_line, 0.75)
                             self.sc_tenv.new_data(img_line, 50)
                             self.sc_zenv.new_data(img_line[:50])
                     self.peak_signal = np.roll(self.peak_signal, self.nfft_peak, axis=0)

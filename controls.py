@@ -39,7 +39,7 @@ class ControlWidget(QtWidgets.QWidget):
         self.thr.setValue(-30)
         self.thr.valueChanged.connect(self.thrChange)
         self.thrText = QtWidgets.QLabel(self)
-        self.thrText.setText("-30")
+        self.thrText.setText("-30 dB")
         hl2.addWidget(self.thrLabel)
         hl2.addWidget(self.thr)
         hl2.addWidget(self.thrText)
@@ -59,5 +59,5 @@ class ControlWidget(QtWidgets.QWidget):
     def thrChange(self):
         thr_dB = self.thr.value()
         thr = 10**(thr_dB/10.0)
-        self.thrText.setText(str(thr_dB))
+        self.thrText.setText(f"{str(thr_dB)} dB")
         self.thrSignal.emit(thr)
