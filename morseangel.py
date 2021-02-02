@@ -1,5 +1,7 @@
 import sys
 from PyQt5 import QtCore, QtWidgets, QtGui, QtMultimedia
+from PyQt5.QtGui import QPalette, QColor
+from PyQt5.QtCore import Qt
 import matplotlib.pyplot as plt
 import matplotlib.lines as mlines
 from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg, NavigationToolbar2QT
@@ -55,7 +57,7 @@ class MplTimeCanvas(FigureCanvasQTAgg):
     def __init__(self, parent=None, width=5, height=4, dpi=100):
         self.fig = Figure(figsize=(width, height), dpi=dpi)
         self.axes = self.fig.add_subplot(111)
-        self.axes.grid(which='both')
+        self.axes.grid(which='both', color="gray")
         self.axes.set_xlabel(u'samples')
         self.fig.tight_layout(pad=1)
         self.time_line = None
@@ -72,7 +74,7 @@ class MplTimeCanvas(FigureCanvasQTAgg):
                 self.axes.lines.pop(0)
         self.zline0 = None
         self.zline1 = None
-        self.time_line, = self.axes.plot(self.time_vect, np.ones_like(self.time_vect)/2, color="blue")
+        self.time_line, = self.axes.plot(self.time_vect, np.ones_like(self.time_vect)/2, color="yellow")
         self.draw()
 
     def new_data(self, data, zoom_span=0):
@@ -103,7 +105,7 @@ class MplPeakCanvas(FigureCanvasQTAgg):
     def __init__(self, parent=None, width=5, height=4, dpi=100):
         self.fig = Figure(figsize=(width, height), dpi=dpi)
         self.axes = self.fig.add_subplot(111)
-        self.axes.grid(which='both')
+        self.axes.grid(which='both', color="gray")
         self.axes.set_xlabel(u'F (Hz)')
         self.axes.set_ylabel(u'Amplitude (log)')
         self.axes.set_yscale('log')
@@ -118,7 +120,7 @@ class MplPeakCanvas(FigureCanvasQTAgg):
 
     def new_data(self, f, s, maxtab, tone):
         if not self.spec_line:
-            self.spec_line, = self.axes.plot(f[0:int(len(f)/2-1)], abs(s[0:int(len(s)/2-1)]),'g-')
+            self.spec_line, = self.axes.plot(f[0:int(len(f)/2-1)], abs(s[0:int(len(s)/2-1)]),'g-', color="yellow")
         else:
             self.spec_line.set_data(f[0:int(len(f)/2-1)], abs(s[0:int(len(s)/2-1)]))
         pmax = max(s)
@@ -150,7 +152,35 @@ class MainWindow(QtWidgets.QMainWindow):
         self.predictions = predictions.Predictions()
         self.initUI()
 
+    def set_palette(self):
+        """ Make same theme as SDRangel
+        """
+        self.palette = self.palette()
+        self.palette.setColor(QPalette.Window, QColor(53,53,53))
+        self.palette.setColor(QPalette.WindowText, Qt.white)
+        self.palette.setColor(QPalette.Base, QColor(25,25,25))
+        self.palette.setColor(QPalette.AlternateBase, QColor(53,53,53))
+        self.palette.setColor(QPalette.ToolTipBase, Qt.white)
+        self.palette.setColor(QPalette.ToolTipText, Qt.black)
+        self.palette.setColor(QPalette.Text, Qt.white)
+        self.palette.setColor(QPalette.Button, QColor(0x40, 0x40, 0x40))
+        self.palette.setColor(QPalette.ButtonText, Qt.white)
+        self.palette.setColor(QPalette.BrightText, Qt.red)
+
+        self.palette.setColor(QPalette.Light, QColor(53,53,53).lighter(125).lighter())
+        self.palette.setColor(QPalette.Mid, QColor(53,53,53).lighter(125))
+        self.palette.setColor(QPalette.Dark, QColor(53,53,53).lighter(125).darker())
+
+        self.palette.setColor(QPalette.Link, QColor(0,0xa0,0xa0))
+        self.palette.setColor(QPalette.LinkVisited, QColor(0,0xa0,0xa0).lighter())
+        self.palette.setColor(QPalette.Highlight, QColor(0xff, 0x8c, 0x00))
+        self.palette.setColor(QPalette.HighlightedText, Qt.black)
+
+        self.setPalette(self.palette)
+
     def initUI(self):
+        self.set_palette()
+        plt.style.use('dark_background')
         exitAct = QtWidgets.QAction('&Exit', self)
         exitAct.setShortcut('Ctrl+Q')
         exitAct.triggered.connect(QtWidgets.qApp.quit)
@@ -160,8 +190,11 @@ class MainWindow(QtWidgets.QMainWindow):
 
         self.statusLabel = QtWidgets.QLabel(self)
         self.fftLabel = QtWidgets.QLabel(self)
+        self.nnLabel = QtWidgets.QLabel(self)
+        self.nnLabel.setText(f"NN {self.predictions.device}")
         self.statusBar().addWidget(self.statusLabel)
         self.statusBar().addWidget(self.fftLabel)
+        self.statusBar().addWidget(self.nnLabel)
         self.statusLabel.setText('Ready')
 
         menubar = self.menuBar()
