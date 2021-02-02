@@ -68,7 +68,10 @@ class MplTimeCanvas(FigureCanvasQTAgg):
         self.axes.set_ylim(-1, 1)
         self.axes.set_xlim(0, nsamples)
         if self.time_line:
-           self.axes.lines.pop(0)
+            while (len(self.axes.lines) > 0):
+                self.axes.lines.pop(0)
+        self.zline0 = None
+        self.zline1 = None
         self.time_line, = self.axes.plot(self.time_vect, np.ones_like(self.time_vect)/2, color="blue")
         self.draw()
 
