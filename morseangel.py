@@ -1,16 +1,18 @@
 import sys
+import queue
 from PyQt5 import QtCore, QtWidgets, QtGui, QtMultimedia
 from PyQt5.QtGui import QPalette, QColor
-from PyQt5.QtCore import Qt
+from PyQt5.QtCore import Qt, QObject, QThread, pyqtSignal
 import matplotlib.pyplot as plt
 import matplotlib.lines as mlines
 from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg, NavigationToolbar2QT
 from matplotlib.figure import Figure
 import numpy as np
 from scipy.signal import periodogram, spectrogram
-import audiodialog, controls, predictions
+import audiodialog, controls, predictions, predworker
 sys.path.append('./notebooks')
 from peakdetect import peakdet
+
 
 def get_audioin_devices():
     return QtMultimedia.QAudioDeviceInfo.availableDevices(QtMultimedia.QAudio.AudioInput)
@@ -46,6 +48,8 @@ def fft_optim(Fs=8000, code_speed=13, decim=7.69):
     return nfft, noverlap
 
 def make_palette():
+    """ Make theme like SDRangel's
+    """
     palette = QPalette()
     palette.setColor(QPalette.Window, QColor(53,53,53))
     palette.setColor(QPalette.WindowText, Qt.white)
@@ -65,13 +69,6 @@ def make_palette():
     palette.setColor(QPalette.Highlight, QColor(0xff, 0x8c, 0x00))
     palette.setColor(QPalette.HighlightedText, Qt.black)
     return palette
-
-
-class TestFigure(object):
-    def __init__(self, parent):
-        self.figure = plt.figure(facecolor='white')
-        self.canvas = FigureCanvasQTAgg(self.figure)
-        self.toolbar = NavigationToolbar2QT(self.canvas, parent)
 
 
 class MplTimeCanvas(FigureCanvasQTAgg):
@@ -172,13 +169,29 @@ class MainWindow(QtWidgets.QMainWindow):
         self.nperseg = 256
         self.thr = 1e-9
         self.predictions = predictions.Predictions()
+        self.dataq = queue.Queue()
+        self.predworker = predworker.PredictionsWorker(self.predictions, self.dataq)
+        self.predthread = QThread()
         self.initUI()
+        self.startPredWorker()
+
+    def startPredWorker(self):
+        self.predworker.moveToThread(self.predthread)
+        self.predthread.started.connect(self.predworker.run)
+        self.predthread.start()
+
+    def stopPredWorker(self):
+        self.predworker.running = False
+
+    def quitApplication(self):
+        self.stopPredWorker()
+        QtWidgets.qApp.quit()
 
     def initUI(self):
         plt.style.use('dark_background')
         exitAct = QtWidgets.QAction('&Exit', self)
         exitAct.setShortcut('Ctrl+Q')
-        exitAct.triggered.connect(QtWidgets.qApp.quit)
+        exitAct.triggered.connect(self.quitApplication)
 
         audioAct = QtWidgets.QAction('&Device', self)
         audioAct.triggered.connect(self.openAudioDialog)
@@ -299,7 +312,7 @@ class MainWindow(QtWidgets.QMainWindow):
             if max(data) > 0:
                 #print(type(data), data.shape)
                 data /= max(data)
-                self.predictions.new_data(data)
+                self.dataq.put(data)
                 self.sc_time.new_data(data)
                 nb_samples = len(buffer_bytes) // self.audio_bytes
                 self.peak_signal[self.peak_signal_index:self.peak_signal_index+nb_samples] = data

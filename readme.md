@@ -18,3 +18,23 @@ Some pure python drafts
 
 This is the main application folder containing `morseangel.py` and its dependencies
 
+## Start
+
+You will need Python3 and virtualenv installed in your system. Firstly create and activate a virtual environment:
+
+```sh
+virtualenv venv
+. ./venv/bin/activate
+```
+
+Install prerequisites with pip:
+
+```sh
+pip install -r requirements.txt
+```
+
+Start application:
+
+```sh
+python ./morseangel.py
+```
