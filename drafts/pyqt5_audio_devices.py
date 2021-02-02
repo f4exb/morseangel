@@ -2,6 +2,7 @@ import sys
 from PyQt5 import QtCore, QtWidgets, QtGui, QtMultimedia
 from PyQt5.QtCore import Qt, pyqtSignal
 import matplotlib.pyplot as plt
+import matplotlib.lines as mlines
 from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg, NavigationToolbar2QT
 from matplotlib.figure import Figure
 import numpy as np
@@ -35,7 +36,7 @@ def nb_samples_per_dit_decim(Fs=8000, code_speed=13, decim=7.69):
         Overlap is nfft - decimation factor
     """
     t_dit = 1.2 / code_speed
-    return int(t_dit * Fs), int(t_dit * Fs) / decim  
+    return int(t_dit * Fs), int(t_dit * Fs) / decim
 
 def fft_optim(Fs=8000, code_speed=13, decim=7.69):
     spd, fft_decim = nb_samples_per_dit_decim(Fs, code_speed, decim)
@@ -60,6 +61,8 @@ class MplTimeCanvas(FigureCanvasQTAgg):
         self.axes.set_xlabel(u'samples')
         self.fig.tight_layout(pad=0)
         self.time_line = None
+        self.zline0 = None
+        self.zline1 = None
         super(MplTimeCanvas, self).__init__(self.fig)
 
     def set_mp(self, nsamples):
@@ -71,13 +74,26 @@ class MplTimeCanvas(FigureCanvasQTAgg):
         self.time_line, = self.axes.plot(self.time_vect, np.ones_like(self.time_vect)/2, color="blue")
         self.draw()
 
-    def new_data(self, data):
+    def new_data(self, data, zoom_span=0):
         plotdata = self.time_line.get_data()[1]
         nb_samples = len(data)
         plotdata = np.roll(plotdata, -nb_samples, axis=0)
         plotdata[-nb_samples:] = data
-        self.axes.set_ylim(min(data), max(data))
+        ymin = min(data)
+        ymax = max(data)
+        self.axes.set_ylim(ymin, ymax)
         self.time_line.set_data(self.time_vect, plotdata)
+        if zoom_span:
+            if self.zline0:
+                self.zline0.remove()
+            if self.zline1:
+                self.zline1.remove()
+            x0 = len(plotdata) - nb_samples
+            x1 = x0 + zoom_span
+            l0 = mlines.Line2D([x0,x0], [ymin,ymax], color="red")
+            l1 = mlines.Line2D([x1,x1], [ymin,ymax], color="red")
+            self.zline0 = self.axes.add_line(l0)
+            self.zline1 = self.axes.add_line(l1)
         self.draw()
 
 
@@ -104,17 +120,19 @@ class MplPeakCanvas(FigureCanvasQTAgg):
         else:
             self.spec_line.set_data(f[0:int(len(f)/2-1)], abs(s[0:int(len(s)/2-1)]))
         pmax = max(s)
-        self.axes.set_ylim(1e-11, pmax)
+        self.axes.set_ylim(1e-5, pmax)
         self.fig.suptitle(f"Signal peak {10*np.log10(pmax):5.2f} dB found at {tone:9.5f} Hz")
         self.draw()
 
 class ControlWidget(QtWidgets.QWidget):
 
     wpmSignal = pyqtSignal(int)
-    
+    thrSignal = pyqtSignal(float)
+
     def __init__(self, *args, **kwargs):
         super(ControlWidget, self).__init__(*args, **kwargs)
         vbox = QtWidgets.QVBoxLayout()
+        # line 1
         hl1 = QtWidgets.QHBoxLayout()
         self.wpmLabel = QtWidgets.QLabel(self)
         self.wpmLabel.setText("WPM")
@@ -132,14 +150,40 @@ class ControlWidget(QtWidgets.QWidget):
         hl1.addWidget(self.wpmText)
         hl1_widget = QtWidgets.QWidget()
         hl1_widget.setLayout(hl1)
+        # line 2
+        hl2 = QtWidgets.QHBoxLayout()
+        self.thrLabel = QtWidgets.QLabel(self)
+        self.thrLabel.setText("Thr")
+        self.thr = QtWidgets.QSlider(Qt.Horizontal)
+        self.thr.setMinimum(-50)
+        self.thr.setMaximum(0)
+        self.thr.setSingleStep(1)
+        self.thr.setPageStep(1)
+        self.thr.setValue(-30)
+        self.thr.valueChanged.connect(self.thrChange)
+        self.thrText = QtWidgets.QLabel(self)
+        self.thrText.setText("-30")
+        hl2.addWidget(self.thrLabel)
+        hl2.addWidget(self.thr)
+        hl2.addWidget(self.thrText)
+        hl2_widget = QtWidgets.QWidget()
+        hl2_widget.setLayout(hl2)
+        # vbox
         self.vbox = QtWidgets.QVBoxLayout()
         self.vbox.addWidget(hl1_widget)
+        self.vbox.addWidget(hl2_widget)
         self.setLayout(self.vbox)
 
     def wpmChange(self):
         wpm = self.wpm.value()
         self.wpmText.setText(str(wpm))
         self.wpmSignal.emit(wpm)
+
+    def thrChange(self):
+        thr_dB = self.thr.value()
+        thr = 10**(thr_dB/10.0)
+        self.thrText.setText(str(thr_dB))
+        self.thrSignal.emit(thr)
 
 
 class MainWindow(QtWidgets.QMainWindow):
@@ -153,12 +197,14 @@ class MainWindow(QtWidgets.QMainWindow):
         self.audio_input = None
         self.audio_buffer = None
         self.audio_bytes = None
-        self.peak_signal = np.zeros((1024*32*2))
+        self.nfft_peak = 1024*16
+        self.peak_signal = np.zeros((self.nfft_peak*2))
         self.peak_signal_index = 0
         self.wpm = 17
         self.nfft = 256
         self.noverlap = 183
         self.nperseg = 256
+        self.thr = 1e-9
         self.initUI()
 
     def initUI(self):
@@ -185,6 +231,7 @@ class MainWindow(QtWidgets.QMainWindow):
         self.sc_peak = MplPeakCanvas(self, width=5, height=3, dpi=100)
         self.controls = ControlWidget()
         self.controls.wpmSignal.connect(self.wpmChange)
+        self.controls.thrSignal.connect(self.thrChange)
         hbo1.addWidget(self.sc_time)
         hbo1.addWidget(self.sc_peak)
         hbo1.addWidget(self.controls)
@@ -211,7 +258,7 @@ class MainWindow(QtWidgets.QMainWindow):
         self.initZEnv()
 
     def initTEnv(self):
-        tenv_size = (1024*32//(self.nfft-self.noverlap)) * 1
+        tenv_size = (self.nfft_peak//(self.nfft-self.noverlap)) * 2
         self.sc_tenv.set_mp(tenv_size)
         print(f"Init tenv {tenv_size}")
 
@@ -237,6 +284,10 @@ class MainWindow(QtWidgets.QMainWindow):
         self.wpm = wpm
         self.nfft, self.noverlap = fft_optim(Fs=self.audio_rate, code_speed=self.wpm)
         print(f"FFT {self.nfft} with overlap {self.noverlap}")
+
+    def thrChange(self, thr):
+        self.thr = thr
+        print(f"Threshold {self.thr}")
 
     def set_audio_device(self):
         format = QtMultimedia.QAudioFormat()
@@ -268,29 +319,31 @@ class MainWindow(QtWidgets.QMainWindow):
             buffer_bytes = buffer_bytes[:self.audio_nsamples*self.audio_bytes] # truncate
             data = np.frombuffer(buffer_bytes, dtype=np.single)
             if max(data) > 0:
+                #print(max(data))
+                data /= max(data)
                 self.sc_time.new_data(data)
                 nb_samples = len(buffer_bytes) // self.audio_bytes
                 self.peak_signal[self.peak_signal_index:self.peak_signal_index+nb_samples] = data
                 self.peak_signal_index += nb_samples
-                if self.peak_signal_index > 1024*32:
-                    f, s = periodogram(self.peak_signal, self.audio_rate, 'blackman', 1024*32, 'linear', False, scaling='spectrum')
+                if self.peak_signal_index > self.nfft_peak:
+                    f, s = periodogram(self.peak_signal, self.audio_rate, 'blackman', self.nfft_peak, 'linear', False, scaling='spectrum')
                     threshold = max(s)*0.9
-                    if threshold > 2e-9:
+                    if threshold > self.thr:
                         maxtab, mintab = peakdet(abs(s[0:int(len(s)/2-1)]), threshold, f[0:int(len(f)/2-1)])
                         tone = maxtab[0,0]
                         #print(f'tone: {tone} thr: {(10.0 * np.log10(threshold)):.2f} dB')
                         self.sc_peak.new_data(f, s, maxtab, tone)
                         nside_bins = 1
-                        f, t, img = specimg(self.audio_rate, self.peak_signal[:1024*32], tone, self.nfft, self.noverlap, nside_bins)
+                        f, t, img = specimg(self.audio_rate, self.peak_signal[:self.nfft_peak], tone, self.nfft, self.noverlap, nside_bins)
                         print(t.shape, f)
                         if len(f) != 0:
                             img_line = np.sum(img, axis=0)
                             img_line /= max(img_line)
                             self.test_line(img_line, 0.75)
-                            self.sc_tenv.new_data(img_line)
+                            self.sc_tenv.new_data(img_line, 50)
                             self.sc_zenv.new_data(img_line[:50])
-                    self.peak_signal = np.roll(self.peak_signal, 1024*32, axis=0)
-                    self.peak_signal_index -= 1024*32
+                    self.peak_signal = np.roll(self.peak_signal, self.nfft_peak, axis=0)
+                    self.peak_signal_index -= self.nfft_peak
 
     @staticmethod
     def test_line(img_line, thr):
