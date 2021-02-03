@@ -51,20 +51,35 @@ class Predictions:
         self.max_ele = 5 # Number of Morse elements considered
         self.look_back = 208 # Constant coming from model training
         self.model = MorseBatchedLSTMStack(self.device, nb_lstm_layers=2, hidden_layer_size=60, output_size=self.max_ele+2, dropout=0.1).to(self.device)
+        #self.model.use_minmax = True
 
     @staticmethod
     def pytorch_rolling_window(x, window_size, step_size=1):
         # unfold dimension to make our rolling window
         return x.unfold(0,window_size,step_size)
 
+    def load_model(self, filename):
+        self.model.load_state_dict(torch.load(filename, map_location=self.device))
+        self.model.eval()
+
     def new_data(self, data):
         """ Takes the latest portion of the signal envelope as a numpy array,
             make predictions using the model and interpret results to produce decoded text.
         """
         if self.tbuffer is None:
-            self.tbuffer = torch.FloatTensor(data)
+            self.tbuffer = torch.FloatTensor(data).to(self.device)
         else:
-            self.tbuffer = torch.cat((self.tbuffer, torch.FloatTensor(data)))
+            self.tbuffer = torch.cat((self.tbuffer, torch.FloatTensor(data).to(self.device)))
         if len(self.tbuffer) > self.look_back:
-            X_test = self.pytorch_rolling_window(self.tbuffer, self.look_back, 1)
-            self.tbuffer = X_test[-1][1:]
+            X_tests = self.pytorch_rolling_window(self.tbuffer, self.look_back, 1)
+            self.tbuffer = X_tests[-1][1:]
+            p_preds = torch.empty(1, self.max_ele+2).to(self.device)
+            for X_test in X_tests:
+                with torch.no_grad():
+                    y_pred = self.model(X_test)
+                    p_preds = torch.cat([p_preds, y_pred.reshape(1, self.max_ele+2)])
+            self.p_preds_t = torch.transpose(p_preds, 0, 1).cpu()
+            self.cbuffer = self.tbuffer.cpu()
+        else:
+            self.p_preds_t = None
+            self.cbuffer = None

@@ -3,6 +3,9 @@ from PyQt5.QtCore import Qt, QObject, QThread, pyqtSignal
 import predictions
 
 class PredictionsWorker(QObject):
+    finished = pyqtSignal()
+    dataReady = pyqtSignal()
+
     def __init__(self, preds, dataq):
         super().__init__()
         self.preds = preds
@@ -16,3 +19,6 @@ class PredictionsWorker(QObject):
             except queue.Empty:
                 continue
             self.preds.new_data(data)
+            if self.preds.p_preds_t is not None:
+                self.dataReady.emit()
+        self.finished.emit()

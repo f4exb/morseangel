@@ -119,6 +119,31 @@ class MplTimeCanvas(FigureCanvasQTAgg):
         self.draw()
 
 
+class MplPredCanvas(FigureCanvasQTAgg):
+
+    def __init__(self, parent=None, width=5, height=4, dpi=100):
+        self.fig = Figure(figsize=(width, height), dpi=dpi)
+        self.axes = self.fig.add_subplot(111)
+        self.axes.grid(which='both', color="gray")
+        self.axes.set_ylim(0, 3)
+        self.fig.tight_layout(pad=1)
+        self.colors = ["lime", "lightsalmon", "yellow", "fuchsia", "cornflowerblue"]
+        super(MplPredCanvas, self).__init__(self.fig)
+
+    def new_data(self, in_data, pred_data, max_ele=5):
+        xmax = len(pred_data[0])
+        self.axes.set_xlim(0, xmax)
+        while (len(self.axes.lines) > 0):
+            self.axes.lines.pop(0)
+        self.axes.plot(in_data, label="i", color="yellow")
+        self.axes.plot(pred_data[0]*0.4 + 1.0, label='c', color="lime")
+        self.axes.plot(pred_data[1]*0.4 + 1.0, label='w', color="lightsalmon")
+        for i in range(max_ele):
+            self.axes.plot(pred_data[i+2]*0.4 + 2.0, label=f'e{i}', color=self.colors[i])
+        self.axes.legend(loc=1)
+        self.draw()
+
+
 class MplPeakCanvas(FigureCanvasQTAgg):
 
     def __init__(self, parent=None, width=5, height=4, dpi=100):
@@ -169,23 +194,33 @@ class MainWindow(QtWidgets.QMainWindow):
         self.nperseg = 256
         self.thr = 1e-9
         self.predictions = predictions.Predictions()
+        self.predictions.load_model("models/default.model")
         self.dataq = queue.Queue()
         self.predworker = predworker.PredictionsWorker(self.predictions, self.dataq)
-        self.predthread = QThread()
+        self.predthread = QThread(self)
         self.initUI()
         self.startPredWorker()
 
     def startPredWorker(self):
         self.predworker.moveToThread(self.predthread)
         self.predthread.started.connect(self.predworker.run)
+        self.predworker.dataReady.connect(self.pred_data)
         self.predthread.start()
 
     def stopPredWorker(self):
         self.predworker.running = False
+        self.predthread.quit()
+        self.predthread.wait()
+        print("stopPredWorker: done")
 
     def quitApplication(self):
         self.stopPredWorker()
+        print("About to quit")
         QtWidgets.qApp.quit()
+
+    def pred_data(self):
+        print(self.predictions.p_preds_t.shape)
+        self.sc_pred.new_data(self.predictions.cbuffer, self.predictions.p_preds_t)
 
     def initUI(self):
         plt.style.use('dark_background')
@@ -212,6 +247,7 @@ class MainWindow(QtWidgets.QMainWindow):
         audioMenu.addAction(audioAct)
 
         vbox = QtWidgets.QVBoxLayout()
+        # line 1
         hbo1 = QtWidgets.QHBoxLayout()
         self.sc_time = MplTimeCanvas(self, width=5, height=2, dpi=100)
         self.sc_peak = MplPeakCanvas(self, width=4.5, height=2, dpi=100)
@@ -221,17 +257,26 @@ class MainWindow(QtWidgets.QMainWindow):
         hbo1.addWidget(self.sc_time, 1)
         hbo1.addWidget(self.sc_peak, 1)
         hbo1.addWidget(self.controls, 1)
-        hbo2 = QtWidgets.QHBoxLayout()
-        self.sc_tenv = MplTimeCanvas(self, width=5, height=3, dpi=100)
-        self.sc_zenv = MplTimeCanvas(self, width=5, height=3, dpi=100)
-        hbo2.addWidget(self.sc_tenv, 2)
-        hbo2.addWidget(self.sc_zenv, 1)
         hbo1_widget = QtWidgets.QWidget()
         hbo1_widget.setLayout(hbo1)
+        # line 2
+        hbo2 = QtWidgets.QHBoxLayout()
+        self.sc_tenv = MplTimeCanvas(self, width=5, height=2, dpi=100)
+        self.sc_zenv = MplTimeCanvas(self, width=5, height=2, dpi=100)
+        hbo2.addWidget(self.sc_tenv, 2)
+        hbo2.addWidget(self.sc_zenv, 1)
         hbo2_widget = QtWidgets.QWidget()
         hbo2_widget.setLayout(hbo2)
+        # line 3
+        hbo3 = QtWidgets.QHBoxLayout()
+        self.sc_pred = MplPredCanvas(self, width=5, height=3, dpi=100)
+        hbo3.addWidget(self.sc_pred)
+        hbo3_widget = QtWidgets.QWidget()
+        hbo3_widget.setLayout(hbo3)
+        # vbox
         vbox.addWidget(hbo1_widget)
         vbox.addWidget(hbo2_widget)
+        vbox.addWidget(hbo3_widget)
         widget = QtWidgets.QWidget()
         widget.setLayout(vbox)
         self.setCentralWidget(widget)
@@ -312,7 +357,6 @@ class MainWindow(QtWidgets.QMainWindow):
             if max(data) > 0:
                 #print(type(data), data.shape)
                 data /= max(data)
-                self.dataq.put(data)
                 self.sc_time.new_data(data)
                 nb_samples = len(buffer_bytes) // self.audio_bytes
                 self.peak_signal[self.peak_signal_index:self.peak_signal_index+nb_samples] = data
@@ -331,6 +375,7 @@ class MainWindow(QtWidgets.QMainWindow):
                         if len(f) != 0:
                             img_line = np.sum(img, axis=0)
                             img_line /= max(img_line)
+                            self.dataq.put(img_line)
                             #self.test_line(img_line, 0.75)
                             self.sc_tenv.new_data(img_line, 50)
                             self.sc_zenv.new_data(img_line[:50])
