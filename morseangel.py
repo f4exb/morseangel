@@ -132,15 +132,16 @@ class MplPredCanvas(FigureCanvasQTAgg):
 
     def new_data(self, in_data, pred_data, max_ele=5):
         xmax = len(pred_data[0])
+        print(len(in_data), xmax)
         self.axes.set_xlim(0, xmax)
         while (len(self.axes.lines) > 0):
             self.axes.lines.pop(0)
         self.axes.plot(in_data, label="i", color="yellow")
-        self.axes.plot(pred_data[0]*0.4 + 1.0, label='c', color="lime")
-        self.axes.plot(pred_data[1]*0.4 + 1.0, label='w', color="lightsalmon")
+        self.axes.plot(pred_data[0]*0.9 + 1.0, label='c', color="lime")
+        self.axes.plot(pred_data[1]*0.9 + 1.0, label='w', color="lightsalmon")
         for i in range(max_ele):
-            self.axes.plot(pred_data[i+2]*0.4 + 2.0, label=f'e{i}', color=self.colors[i])
-        self.axes.legend(loc=1)
+            self.axes.plot(pred_data[i+2]*0.9 + 2.0, label=f'e{i}', color=self.colors[i])
+        self.axes.legend(bbox_to_anchor=(-0.1, 1.1), loc='upper left')
         self.draw()
 
 
@@ -219,7 +220,6 @@ class MainWindow(QtWidgets.QMainWindow):
         QtWidgets.qApp.quit()
 
     def pred_data(self):
-        print(self.predictions.p_preds_t.shape)
         self.sc_pred.new_data(self.predictions.cbuffer, self.predictions.p_preds_t)
 
     def initUI(self):
@@ -269,7 +269,7 @@ class MainWindow(QtWidgets.QMainWindow):
         hbo2_widget.setLayout(hbo2)
         # line 3
         hbo3 = QtWidgets.QHBoxLayout()
-        self.sc_pred = MplPredCanvas(self, width=5, height=3, dpi=100)
+        self.sc_pred = MplPredCanvas(self, width=5, height=2.5, dpi=100)
         hbo3.addWidget(self.sc_pred)
         hbo3_widget = QtWidgets.QWidget()
         hbo3_widget.setLayout(hbo3)
@@ -281,7 +281,7 @@ class MainWindow(QtWidgets.QMainWindow):
         widget.setLayout(vbox)
         self.setCentralWidget(widget)
 
-        self.setGeometry(100, 100, 1400, 600)
+        self.setGeometry(100, 100, 1400, 700)
         self.setWindowTitle('MorseAngel')
         self.show()
 

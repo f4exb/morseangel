@@ -51,7 +51,7 @@ class Predictions:
         self.max_ele = 5 # Number of Morse elements considered
         self.look_back = 208 # Constant coming from model training
         self.model = MorseBatchedLSTMStack(self.device, nb_lstm_layers=2, hidden_layer_size=60, output_size=self.max_ele+2, dropout=0.1).to(self.device)
-        #self.model.use_minmax = True
+        self.model.use_minmax = True
 
     @staticmethod
     def pytorch_rolling_window(x, window_size, step_size=1):
@@ -71,6 +71,8 @@ class Predictions:
         else:
             self.tbuffer = torch.cat((self.tbuffer, torch.FloatTensor(data).to(self.device)))
         if len(self.tbuffer) > self.look_back:
+            l = len(self.tbuffer) - self.look_back + 1
+            self.cbuffer = self.tbuffer[-l:].cpu()
             X_tests = self.pytorch_rolling_window(self.tbuffer, self.look_back, 1)
             self.tbuffer = X_tests[-1][1:]
             p_preds = torch.empty(1, self.max_ele+2).to(self.device)
@@ -78,8 +80,8 @@ class Predictions:
                 with torch.no_grad():
                     y_pred = self.model(X_test)
                     p_preds = torch.cat([p_preds, y_pred.reshape(1, self.max_ele+2)])
+            p_preds = p_preds[1:] # drop first garbage sample
             self.p_preds_t = torch.transpose(p_preds, 0, 1).cpu()
-            self.cbuffer = self.tbuffer.cpu()
         else:
             self.p_preds_t = None
             self.cbuffer = None
