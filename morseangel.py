@@ -103,7 +103,7 @@ class MplTimeCanvas(FigureCanvasQTAgg):
         plotdata[-nb_samples:] = data
         ymin = min(data)
         ymax = max(data)
-        self.axes.set_ylim(ymin, ymax)
+        self.axes.set_ylim(ymin*1.2, ymax*1.2)
         self.time_line.set_data(self.time_vect, plotdata)
         if zoom_span:
             if self.zline0:
@@ -124,23 +124,38 @@ class MplPredCanvas(FigureCanvasQTAgg):
     def __init__(self, parent=None, width=5, height=4, dpi=100):
         self.fig = Figure(figsize=(width, height), dpi=dpi)
         self.axes = self.fig.add_subplot(111)
-        self.axes.grid(which='both', color="gray")
+        self.axes.grid(which='both', color="gray", alpha=0.8)
         self.axes.set_ylim(0, 3)
         self.fig.tight_layout(pad=1)
-        self.colors = ["lime", "lightsalmon", "yellow", "fuchsia", "cornflowerblue"]
+        self.colors = ["yellow", "lime", "lightsalmon", "lime", "lightsalmon", "yellow", "fuchsia", "cornflowerblue"]
         super(MplPredCanvas, self).__init__(self.fig)
 
-    def new_data(self, in_data, pred_data, max_ele=5):
+    def set_mp(self, nsamples, max_ele=5):
+        self.nsamples = nsamples
+        self.max_ele = max_ele
+        self.lines = np.zeros((max_ele+3, nsamples))
+        self.labels = ["in", "cs", "ws"]
+        for i in range(max_ele):
+            self.labels.append(f"e{i}")
+        self.axes.set_xlim(0, nsamples)
+
+    def new_data(self, in_data, pred_data):
+        self.lines[0] = np.roll(self.lines[0], -len(in_data), axis=0)
+        self.lines[0][-len(in_data):] = in_data
         xmax = len(pred_data[0])
-        print(len(in_data), xmax)
-        self.axes.set_xlim(0, xmax)
+        for i in range(1, self.max_ele+3):
+            self.lines[i] = np.roll(self.lines[i], -xmax, axis=0)
+            self.lines[i][-xmax:] = pred_data[i-1]
         while (len(self.axes.lines) > 0):
             self.axes.lines.pop(0)
-        self.axes.plot(in_data, label="i", color="yellow")
-        self.axes.plot(pred_data[0]*0.9 + 1.0, label='c', color="lime")
-        self.axes.plot(pred_data[1]*0.9 + 1.0, label='w', color="lightsalmon")
-        for i in range(max_ele):
-            self.axes.plot(pred_data[i+2]*0.9 + 2.0, label=f'e{i}', color=self.colors[i])
+        for i in range(self.max_ele+3):
+            if i == 0:
+                y = 0
+            elif i < 3:
+                y = 1
+            else:
+                y = 2
+            self.axes.plot(self.lines[i]*0.9 + y, label=self.labels[i], color=self.colors[i], alpha=0.8)
         self.axes.legend(bbox_to_anchor=(-0.1, 1.1), loc='upper left')
         self.draw()
 
@@ -165,7 +180,7 @@ class MplPeakCanvas(FigureCanvasQTAgg):
 
     def new_data(self, f, s, maxtab, tone):
         if not self.spec_line:
-            self.spec_line, = self.axes.plot(f[0:int(len(f)/2-1)], abs(s[0:int(len(s)/2-1)]),'g-', color="yellow")
+            self.spec_line, = self.axes.plot(f[0:int(len(f)/2-1)], abs(s[0:int(len(s)/2-1)]),'g-', color="yellow", alpha=0.8)
         else:
             self.spec_line.set_data(f[0:int(len(f)/2-1)], abs(s[0:int(len(s)/2-1)]))
         pmax = max(s)
@@ -194,6 +209,7 @@ class MainWindow(QtWidgets.QMainWindow):
         self.noverlap = 183
         self.nperseg = 256
         self.thr = 1e-9
+        self.pred_len = 0
         self.predictions = predictions.Predictions()
         self.predictions.load_model("models/default.model")
         self.dataq = queue.Queue()
@@ -375,6 +391,9 @@ class MainWindow(QtWidgets.QMainWindow):
                         if len(f) != 0:
                             img_line = np.sum(img, axis=0)
                             img_line /= max(img_line)
+                            if len(img_line) != self.pred_len:
+                                self.pred_len = len(img_line)
+                                self.sc_pred.set_mp(self.pred_len*4)
                             self.dataq.put(img_line)
                             #self.test_line(img_line, 0.75)
                             self.sc_tenv.new_data(img_line, 50)
