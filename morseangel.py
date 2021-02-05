@@ -1,7 +1,7 @@
 import sys
 import queue
 from PyQt5 import QtCore, QtWidgets, QtGui, QtMultimedia
-from PyQt5.QtGui import QPalette, QColor
+from PyQt5.QtGui import QPalette, QColor, QTextCursor
 from PyQt5.QtCore import Qt, QObject, QThread, pyqtSignal
 import matplotlib.pyplot as plt
 import matplotlib.lines as mlines
@@ -76,7 +76,7 @@ class MplTimeCanvas(FigureCanvasQTAgg):
     def __init__(self, parent=None, width=5, height=4, dpi=100):
         self.fig = Figure(figsize=(width, height), dpi=dpi)
         self.axes = self.fig.add_subplot(111)
-        self.axes.grid(which='both', color="gray")
+        self.axes.grid(which='both', color="gray", alpha=0.8)
         self.axes.set_xlabel(u'samples')
         self.fig.tight_layout(pad=1)
         self.time_line = None
@@ -93,7 +93,7 @@ class MplTimeCanvas(FigureCanvasQTAgg):
                 self.axes.lines.pop(0)
         self.zline0 = None
         self.zline1 = None
-        self.time_line, = self.axes.plot(self.time_vect, np.ones_like(self.time_vect)/2, color="yellow")
+        self.time_line, = self.axes.plot(self.time_vect, np.ones_like(self.time_vect)/2, color="yellow", alpha=0.8)
         self.draw()
 
     def new_data(self, data, zoom_span=0):
@@ -127,7 +127,7 @@ class MplPredCanvas(FigureCanvasQTAgg):
         self.axes.grid(which='both', color="gray", alpha=0.8)
         self.axes.set_ylim(0, 3)
         self.fig.tight_layout(pad=1)
-        self.colors = ["yellow", "lime", "lightsalmon", "lime", "lightsalmon", "yellow", "fuchsia", "cornflowerblue"]
+        self.colors = ["yellow", "lime", "lightsalmon", "lime", "lightsalmon", "cornflowerblue", "yellow", "fuchsia"]
         super(MplPredCanvas, self).__init__(self.fig)
 
     def set_mp(self, nsamples, max_ele=5):
@@ -180,7 +180,7 @@ class MplPeakCanvas(FigureCanvasQTAgg):
 
     def new_data(self, f, s, maxtab, tone):
         if not self.spec_line:
-            self.spec_line, = self.axes.plot(f[0:int(len(f)/2-1)], abs(s[0:int(len(s)/2-1)]),'g-', color="yellow", alpha=0.8)
+            self.spec_line, = self.axes.plot(f[0:int(len(f)/2-1)], abs(s[0:int(len(s)/2-1)]),'g-', color="lime", alpha=0.8)
         else:
             self.spec_line.set_data(f[0:int(len(f)/2-1)], abs(s[0:int(len(s)/2-1)]))
         pmax = max(s)
@@ -222,6 +222,7 @@ class MainWindow(QtWidgets.QMainWindow):
         self.predworker.moveToThread(self.predthread)
         self.predthread.started.connect(self.predworker.run)
         self.predworker.dataReady.connect(self.pred_data)
+        self.predworker.newChar.connect(self.new_char)
         self.predthread.start()
 
     def stopPredWorker(self):
@@ -237,6 +238,11 @@ class MainWindow(QtWidgets.QMainWindow):
 
     def pred_data(self):
         self.sc_pred.new_data(self.predictions.cbuffer, self.predictions.p_preds_t)
+
+    def new_char(self, char):
+        cursor = QTextCursor(self.textbox.document())
+        cursor.movePosition(QTextCursor.End)
+        cursor.insertText(char)
 
     def initUI(self):
         plt.style.use('dark_background')
@@ -285,19 +291,26 @@ class MainWindow(QtWidgets.QMainWindow):
         hbo2_widget.setLayout(hbo2)
         # line 3
         hbo3 = QtWidgets.QHBoxLayout()
-        self.sc_pred = MplPredCanvas(self, width=5, height=2.5, dpi=100)
-        hbo3.addWidget(self.sc_pred)
+        self.textbox = QtWidgets.QTextEdit(self)
+        hbo3.addWidget(self.textbox)
         hbo3_widget = QtWidgets.QWidget()
         hbo3_widget.setLayout(hbo3)
+        # line 4
+        hbo4 = QtWidgets.QHBoxLayout()
+        self.sc_pred = MplPredCanvas(self, width=5, height=2.5, dpi=100)
+        hbo4.addWidget(self.sc_pred)
+        hbo4_widget = QtWidgets.QWidget()
+        hbo4_widget.setLayout(hbo4)
         # vbox
         vbox.addWidget(hbo1_widget)
         vbox.addWidget(hbo2_widget)
         vbox.addWidget(hbo3_widget)
+        vbox.addWidget(hbo4_widget)
         widget = QtWidgets.QWidget()
         widget.setLayout(vbox)
         self.setCentralWidget(widget)
 
-        self.setGeometry(100, 100, 1400, 700)
+        self.setGeometry(100, 100, 1400, 800)
         self.setWindowTitle('MorseAngel')
         self.show()
 
@@ -387,13 +400,13 @@ class MainWindow(QtWidgets.QMainWindow):
                         self.sc_peak.new_data(f, s, maxtab, tone)
                         nside_bins = 1
                         f, t, img = specimg(self.audio_rate, self.peak_signal[:self.nfft_peak], tone, self.nfft, self.noverlap, nside_bins)
-                        print(t.shape, f)
+                        #print(t.shape, f)
                         if len(f) != 0:
                             img_line = np.sum(img, axis=0)
                             img_line /= max(img_line)
                             if len(img_line) != self.pred_len:
                                 self.pred_len = len(img_line)
-                                self.sc_pred.set_mp(self.pred_len*4)
+                                self.sc_pred.set_mp(self.pred_len*3)
                             self.dataq.put(img_line)
                             #self.test_line(img_line, 0.75)
                             self.sc_tenv.new_data(img_line, 50)

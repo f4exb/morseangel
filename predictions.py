@@ -1,5 +1,6 @@
 import torch
 import torch.nn as nn
+import numpy as np
 
 
 class MorseBatchedLSTMStack(nn.Module):
@@ -52,6 +53,9 @@ class Predictions:
         self.look_back = 208 # Constant coming from model training
         self.model = MorseBatchedLSTMStack(self.device, nb_lstm_layers=2, hidden_layer_size=60, output_size=self.max_ele+2, dropout=0.1).to(self.device)
         self.model.use_minmax = True
+        self.lp_len = 3
+        self.lp_win = np.ones(self.lp_len) / self.lp_len
+        self.lp = True # post process predictions through moving average low pass filtering
 
     @staticmethod
     def pytorch_rolling_window(x, window_size, step_size=1):
@@ -81,7 +85,12 @@ class Predictions:
                     y_pred = self.model(X_test)
                     p_preds = torch.cat([p_preds, y_pred.reshape(1, self.max_ele+2)])
             p_preds = p_preds[1:] # drop first garbage sample
-            self.p_preds_t = torch.transpose(p_preds, 0, 1).cpu()
+            p_preds_t = torch.transpose(p_preds, 0, 1).cpu()
+            if self.lp:
+                p_preds_t = np.apply_along_axis(lambda m: np.convolve(m, self.lp_win, mode='full'), axis=1, arr=p_preds_t)
+                self.p_preds_t = p_preds_t[:,:-self.lp_len+1]
+            else:
+                self.p_preds_t = p_preds_t
         else:
             self.p_preds_t = None
             self.cbuffer = None
