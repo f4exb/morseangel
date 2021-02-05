@@ -2,7 +2,7 @@
 
 <h1>Deep Neural Networks for Morse decoding</h1>
 
-This is a Python3 application Based on PyQt5 for the GUI and PyTorch for the Deep Neural Network. Its purpose is to decode Morse from the sound coming from an audio device.
+This is a Python3 application Based on PyQt5 for the GUI and PyTorch for the Deep Neural Network. Its purpose is to decode Morse code from the sound coming from an audio device.
 
 At this stage the model (and thus the "program") is far from working satisfactorily. I cannot spend much more time on this since I already dedicated a lot of time to reach this point. However this is Open Source and contributors are welcome to continue the work, bring enhancements or take a different route to obtain better results. I hope the present materials can serve as a base.
 
@@ -64,7 +64,7 @@ The "Device" menu item opens a dialog to choose the Audio input. An audio input 
 ![Main Window](./doc/img/MorseAngel_audio_in.png)
 
   - **1**: Select input device
-  - **2**: Select sample rate among available sample rates for device. As much as possible the 8000 S/s sample rate should be selected or the nearest value.
+  - **2**: Select sample rate among available sample rates for device. As much as possible the 8000 S/s sample rate should be selected or its nearest value.
   - **3**: Confirm selection and close dialog
   - **4**: Cancel selection and close dialog
 
@@ -82,7 +82,7 @@ This is the output of the 16k FFT used to find the frequency of the signal peak.
 
 <h4>D.1: Set Words Per Minute (WPM)</h4>
 
-Use this slider to adjust the Morse code speed in Words Per Minute. You can get help from the envelope signal zoom (F). Yhe optimal length for a dit is 7.69 so a dit should fit from its base in a 10 samples interval.
+Use this slider to adjust the Morse code speed in Words Per Minute. You can get help from the envelope signal zoom (F). Yhe optimal length for a dit is 7.69 so the base of a dit pulse should fit in a 10 samples interval.
 
 <h4>D.2: Threshold</h4>
 
@@ -104,7 +104,7 @@ The decoded text from Morse audio appears here
 
 <h3>H: NN output view</h3>
 
-This view displays the timeline of the Neural Network output. There are 7 timelines with the corresponding legend:
+This view displays the time lines of the Neural Network output. There are 7 time lines with the corresponding legend:
 
   - **in**: input signal
   - **cs**: character separator
@@ -115,15 +115,15 @@ This view displays the timeline of the Neural Network output. There are 7 timeli
   - **e3**: fourth Morse element
   - **e4**: fifth Morse element
 
-Morse characters are decomposed in their constituting elements (the "dits" and the "dahs") that is the "on" periods of the On Off Keying (OOK) signal. The purpose of the NN model is to classify these elements in order for each Morse character in their relative position from the start of the character. It has also (of course) to identify the periods of silence into character and word separators. It is not necessary and in fact detrimental to identify the silence between Morse elements. It is limited to 5 Morse elements that is alphanumeric characters plus a few special characters such as `+`, `/` and `=`
+Morse characters are decomposed in their constituting elements (the "dits" and the "dahs") that is the "on" periods of the On Off Keying (OOK) signal. The purpose of the NN model is to classify these elements by their relative position in the Morse elements sequence from the start of the character. It has also (of course) to identify the periods of silence into character and word separators. It is not necessary and in fact detrimental to identify the silence between Morse elements. It is limited to 5 Morse elements that is alphanumeric characters plus a few special characters such as `+`, `/` and `=`.
 
-The NN model is based on a LSTM layer. In fact there are two LSTM layers stacked on top of each other (easy to do in PyTorch) and a final Dense (Linear in PyTorch's terms) layer. Thus it takes the imput samples as a stream with a "look back" period corresponding to the longest Morse character possible which is `0` since it is limited to 5 Morse elements. It regurgitates the 7 signals above as sample streams alse.
+The NN model is based on a LSTM layer. In fact there are two LSTM layers stacked on top of each other (easy to do in PyTorch) and a final Dense (Linear in PyTorch's terms) layer. Thus it takes the imput samples as a stream with a "look back" period corresponding to the longest Morse character possible which is `0` since it is limited to 5 Morse elements. It regurgitates the 7 signals above as sample streams accordingly.
 
-A final purely algorithmic stage does the decoding by identifying character and word breaks using the `cs` and `ws` "senses" and estimating the relative length of the "on" period on each `e#` element sense. Once the successive "dits" and "dahs" are identified a simple lookup table yields the displayable character that is appended to the decoded text.
+A final purely algorithmic stage does the decoding by identifying character and word breaks using the `cs` and `ws` signals and estimating the relative length of the "on" period on each `e#` element signal. Once the successive "dits" and "dahs" are identified a simple lookup table yields the displayable character that is appended to the decoded text.
 
-Ideally a "dit" period should be represented by 7.69 samples corresponding to the training of the model. For now there is now other way to get close to this value than estimating the Morse code speed in Words Per Minute (WPM) manually. There is an "official" correspondance that states that the period of a "dit" in seconds is 1.2 &div; WPM.
+Ideally a "dit" period should be represented by 7.69 samples corresponding to the training of the model. For now there is no other way to get close to this value than estimating the Morse code speed in Words Per Minute (WPM) manually. There is an "official" correspondance that states that the period of a "dit" in seconds is 1.2 &div; WPM.
 
-The preprocessing extracts the envelope taking the FFT of the signal with an overlay. Knowing the Morse code speed in WPM the program can compute optimal parameters of FFT length and overlay length to reach 7.69 samples per dit. The FFT size and overlay are displayed in the status line (See next.)
+The preprocessing extracts the envelope based the FFT of the signal with an overlay. This method best preserves the timing of the signal which is essential in Morse coding. Knowing the Morse code speed in WPM the program can compute optimal parameters of FFT length and overlay length to reach 7.69 samples per dit. The FFT size and overlay are displayed in the status line (See next.)
 
 <h3>I: status</h3>
 
