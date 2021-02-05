@@ -185,7 +185,7 @@ class MplPeakCanvas(FigureCanvasQTAgg):
             self.spec_line.set_data(f[0:int(len(f)/2-1)], abs(s[0:int(len(s)/2-1)]))
         pmax = max(s)
         self.axes.set_ylim(1e-5, pmax)
-        self.axes.set_xlabel(f'F (Hz) - {tone:9.5f} ({10*np.log10(pmax):5.2f} dB)')
+        self.axes.set_xlabel(f'F (Hz) \u2191 {tone:9.5f} ({10*np.log10(pmax):5.2f} dB)')
         #self.fig.suptitle(f"Signal peak {10*np.log10(pmax):5.2f} dB found at {tone:9.5f} Hz")
         self.draw()
 

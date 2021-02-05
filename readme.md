@@ -4,6 +4,10 @@
 
 This is a Python3 application Based on PyQt5 for the GUI and PyTorch for the Deep Neural Network. Its purpose is to decode Morse from the sound coming from an audio device.
 
+At this stage the model (and thus the "program") is far from working satisfactorily. I cannot spend much more time on this since I already dedicated a lot of time to reach this point. However this is Open Source and contributors are welcome to continue the work, bring enhancements or take a different route to obtain better results. I hope the present materials can serve as a base.
+
+Details on the Neural Network (NN) are given in paragraph H of the Usage section.
+
 <h2>Contents</h2>
 
 <h3>notebooks</h3>
@@ -70,7 +74,7 @@ This time line display shows the amplitude of the audio signal
 
 <h3>C: Spectrum peak detection</h3>
 
-This is the output of the 16k FFT used to find the frequency of the signal peak
+This is the output of the 16k FFT used to find the frequency of the signal peak. The detected peak frequency along with its magnitude in dB is displayed in the legend below the `x` axis
 
 <h3>D: Controls</h3>
 
@@ -88,7 +92,7 @@ Adjust the value in dB for peak detection.
 
 This is the time line of the detected envelope. Envelope is obtained from the bin of FFT size shown in (I.3) where lies the peak detected by the peak detector (see C). The &plusmn;1 bins surrounding the peak bin are also considered (summed up).
 
-The red bars delimit the zoomed view shond in F
+The red bars delimit the zoomed view shown in F
 
 <h3>F: Zoomed envelope</h3>
 
@@ -100,7 +104,7 @@ The decoded text from Morse audio appears here
 
 <h3>H: NN output view</h3>
 
-This view displays the timeline of the Neural Network output. There are 7 lines which the corresponding legend:
+This view displays the timeline of the Neural Network output. There are 7 timelines with the corresponding legend:
 
   - **in**: input signal
   - **cs**: character separator
@@ -111,6 +115,16 @@ This view displays the timeline of the Neural Network output. There are 7 lines 
   - **e3**: fourth Morse element
   - **e4**: fifth Morse element
 
+Morse characters are decomposed in their constituting elements (the "dits" and the "dahs") that is the "on" periods of the On Off Keying (OOK) signal. The purpose of the NN model is to classify these elements in order for each Morse character in their relative position from the start of the character. It has also (of course) to identify the periods of silence into character and word separators. It is not necessary and in fact detrimental to identify the silence between Morse elements. It is limited to 5 Morse elements that is alphanumeric characters plus a few special characters such as `+`, `/` and `=`
+
+The NN model is based on a LSTM layer. In fact there are two LSTM layers stacked on top of each other (easy to do in PyTorch) and a final Dense (Linear in PyTorch's terms) layer. Thus it takes the imput samples as a stream with a "look back" period corresponding to the longest Morse character possible which is `0` since it is limited to 5 Morse elements. It regurgitates the 7 signals above as sample streams alse.
+
+A final purely algorithmic stage does the decoding by identifying character and word breaks using the `cs` and `ws` "senses" and estimating the relative length of the "on" period on each `e#` element sense. Once the successive "dits" and "dahs" are identified a simple lookup table yields the displayable character that is appended to the decoded text.
+
+Ideally a "dit" period should be represented by 7.69 samples corresponding to the training of the model. For now there is now other way to get close to this value than estimating the Morse code speed in Words Per Minute (WPM) manually. There is an "official" correspondance that states that the period of a "dit" in seconds is 1.2 &div; WPM.
+
+The preprocessing extracts the envelope taking the FFT of the signal with an overlay. Knowing the Morse code speed in WPM the program can compute optimal parameters of FFT length and overlay length to reach 7.69 samples per dit. The FFT size and overlay are displayed in the status line (See next.)
+
 <h3>I: status</h3>
 
 ![Main Window](./doc/img/MorseAngel_status.png)
@@ -119,6 +133,6 @@ This view displays the timeline of the Neural Network output. There are 7 lines 
   - **2**: Sample rate in samples per second (S/s)
   - **3**: Envelope detection FFT size
   - **4**: Envelope detection FFT overlay
-  - **5**: Device used for Neural Network inference. It can be `cuda` if Nvidia GPU can bee used else `cpu`.
+  - **5**: Device used for Neural Network inference. It can be `cuda` if Nvidia GPU can be used else `cpu`.
 
 FFT size and overlay is automatically selected for optimal values depending on sample rate and Morse code speed (WPM).
