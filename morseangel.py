@@ -190,6 +190,38 @@ class MplPeakCanvas(FigureCanvasQTAgg):
         self.draw()
 
 
+class MplHistCanvas(FigureCanvasQTAgg):
+
+    def __init__(self, parent=None, width=5, height=4, dpi=150):
+        self.fig = Figure(figsize=(width, height), dpi=dpi)
+        self.axes = self.fig.add_subplot(111)
+        self.axes.grid(which='both', color="gray")
+        self.ylim = 50
+        self.xlim = 50
+        self.axes.set_ylim(0, self.ylim)
+        self.axes.set_xlim(0, self.xlim)
+        lditl = mlines.Line2D([11,11], [0,self.ylim], color="red", linestyle="--")
+        ldits = mlines.Line2D([17,17], [0,self.ylim], color="red")
+        ldith = mlines.Line2D([23,23], [0,self.ylim], color="red", linestyle="--")
+        ldahl = mlines.Line2D([25,25], [0,self.ylim], color="yellow", linestyle="--")
+        ldahs = mlines.Line2D([32,32], [0,self.ylim], color="yellow")
+        self.axes.add_line(lditl)
+        self.axes.add_line(ldits)
+        self.axes.add_line(ldith)
+        self.axes.add_line(ldahl)
+        self.axes.add_line(ldahs)
+        self.fig.tight_layout(pad=1)
+        self.hbars = None
+        super(MplHistCanvas, self).__init__(self.fig)
+
+    def new_data(self, his):
+        max_his = int(max(his)) + 1
+        if self.hbars:
+            t = [b.remove() for b in self.hbars]
+        self.hcounts, self.hbins, self.hbars = self.hist = self.axes.hist(his, bins=max_his, color="lightskyblue")
+        self.draw()
+
+
 class MainWindow(QtWidgets.QMainWindow):
 
     def __init__(self, *args, **kwargs):
@@ -238,6 +270,7 @@ class MainWindow(QtWidgets.QMainWindow):
 
     def pred_data(self):
         self.sc_pred.new_data(self.predictions.cbuffer, self.predictions.p_preds_t)
+        self.sc_hist.new_data(self.predworker.decoder.his)
 
     def new_char(self, char):
         cursor = QTextCursor(self.textbox.document())
@@ -292,7 +325,9 @@ class MainWindow(QtWidgets.QMainWindow):
         # line 3
         hbo3 = QtWidgets.QHBoxLayout()
         self.textbox = QtWidgets.QTextEdit(self)
-        hbo3.addWidget(self.textbox)
+        self.sc_hist = MplHistCanvas(self, width=5, height=2, dpi=100)
+        hbo3.addWidget(self.textbox, 2)
+        hbo3.addWidget(self.sc_hist, 1)
         hbo3_widget = QtWidgets.QWidget()
         hbo3_widget.setLayout(hbo3)
         # line 4
@@ -345,12 +380,10 @@ class MainWindow(QtWidgets.QMainWindow):
         self.wpm = wpm
         self.nfft, self.noverlap = fft_optim(Fs=self.audio_rate, code_speed=self.wpm)
         self.fftLabel.setText(f'FFT {self.nfft} OVL {self.noverlap}')
-        print(f"FFT {self.nfft} with overlap {self.noverlap}")
         self.set_audio_device()
 
     def thrChange(self, thr):
-        self.thr = thr
-        print(f"Threshold {self.thr}")
+        self.thr = thr*0.9
 
     def set_audio_device(self):
         format = QtMultimedia.QAudioFormat()
@@ -377,6 +410,7 @@ class MainWindow(QtWidgets.QMainWindow):
         self.initTEnv()
         self.audio_buffer = self.audio_input.start()
         self.audio_buffer.readyRead.connect(self.audioRead)
+        self.predworker.reset_hist()
 
     def audioRead(self):
         buffer_bytes = self.audio_buffer.readAll()
@@ -386,6 +420,9 @@ class MainWindow(QtWidgets.QMainWindow):
             if max(data) > 0:
                 #print(type(data), data.shape)
                 data /= max(data)
+                # data /= (max(data)/2.0)
+                # data[data > 1] = 1
+                # data[data < -1] = -1
                 self.sc_time.new_data(data)
                 nb_samples = len(buffer_bytes) // self.audio_bytes
                 self.peak_signal[self.peak_signal_index:self.peak_signal_index+nb_samples] = data
@@ -403,7 +440,8 @@ class MainWindow(QtWidgets.QMainWindow):
                         #print(t.shape, f)
                         if len(f) != 0:
                             img_line = np.sum(img, axis=0)
-                            img_line /= max(img_line)
+                            img_line /= (max(img_line)/1.5)
+                            img_line[img_line > 1] = 1
                             if len(img_line) != self.pred_len:
                                 self.pred_len = len(img_line)
                                 self.sc_pred.set_mp(self.pred_len*3)

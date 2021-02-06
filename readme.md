@@ -82,7 +82,7 @@ This is the output of the 16k FFT used to find the frequency of the signal peak.
 
 <h4>D.1: Set Words Per Minute (WPM)</h4>
 
-Use this slider to adjust the Morse code speed in Words Per Minute. You can get help from the envelope signal zoom (F). Yhe optimal length for a dit is 7.69 so the base of a dit pulse should fit in a 10 samples interval.
+Use this slider to adjust the Morse code speed in Words Per Minute. You can get help from the envelope signal zoom (F). Yhe optimal length for a dit is 7.69 so the base of a dit pulse should fit in a 10 samples interval. When decodes start to flow the histogram (H) populates and also give an idea of the right setting of WPM. Most amateur radio transmission are done with a WPM around 22~27.
 
 <h4>D.2: Threshold</h4>
 
@@ -96,13 +96,33 @@ The red bars delimit the zoomed view shown in F
 
 <h3>F: Zoomed envelope</h3>
 
-The part of envelope between the red bars in (E) is displayed here
+The part of envelope between the red bars in (E) is displayed here. A calibrated 13 WPM signal has been used when taking the screenshot so this is the kind of envelope one should be aiming at. Increasing WPM will broaden the peaks.
 
 <h3>G: Decoded text</h3>
 
 The decoded text from Morse audio appears here
 
-<h3>H: NN output view</h3>
+<h3>H: Element length histogram</h3>
+
+This is the histogram of element lengths over the length of one character. Clearly there are 3 accumulations from lower to higher (left to right):
+
+  - Garbage
+  - Dits
+  - Dahs
+
+The decoder is based in splitting lengths into these 3 areas with:
+
+  - Lower end for dits: 11 included
+  - Higher end for dits: 23 excluded
+  - Lower end for dahs: 25 included
+
+The ideal position of the dits (17) and dahs (32) is displayed with a red and yellow line respectively. The corresponding bin in the histogram is at the right of the line so ideally the peak should appear at the right of the line. In practice having the peak close to the line is good enough. The dit and dah thresholds appear in dashed lines of their respective colors.
+
+One should try to fit the lengths into these limits with the appropriate WPM setting. A calibrated 13 WPM signal has been used when taking the screenshot so this is the kind of histogram one should be aiming at. Increasing WPM will increase element lengths and therefore move peaks to the right.
+
+On strong signals the skill of the operator can also be measured in the shape of the peak. If they are narrow and dahs position is about twice the dits position then timing is correct and regular. As expected this yields better decodes. On weak signals the peaks will broaden inevitably.
+
+<h3>I: NN output view</h3>
 
 This view displays the time lines of the Neural Network output. There are 7 time lines with the corresponding legend:
 
@@ -125,7 +145,7 @@ Ideally a "dit" period should be represented by 7.69 samples corresponding to th
 
 The preprocessing extracts the envelope based the FFT of the signal with an overlay. This method best preserves the timing of the signal which is essential in Morse coding. Knowing the Morse code speed in WPM the program can compute optimal parameters of FFT length and overlay length to reach 7.69 samples per dit. The FFT size and overlay are displayed in the status line (See next.)
 
-<h3>I: status</h3>
+<h3>J: status</h3>
 
 ![Main Window](./doc/img/MorseAngel_status.png)
 

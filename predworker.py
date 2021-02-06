@@ -20,6 +20,9 @@ class PredictionsWorker(QObject):
     def set_thr(self, thr):
         self.decoder.set_thr(thr)
 
+    def reset_hist(self):
+        self.decoder.reset_hist()
+
     def run(self):
         while self.running:
             try:

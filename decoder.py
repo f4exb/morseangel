@@ -1,7 +1,8 @@
 import morse
+import numpy as np
 
 class MorseDecoderRegen:
-    def __init__(self, alphabet=morse.alphabet, dit_len=8, max_ele=5, thr=0.9):
+    def __init__(self, alphabet=morse.alphabet, dit_len=8, max_ele=5, thr=0.9, his_len=400):
         self.nb_alpha = len(alphabet)
         self.alphabet = alphabet
         self.dit_len = dit_len
@@ -11,6 +12,8 @@ class MorseDecoderRegen:
         self.char = " "
         self.env_char = []
         self.morsestr = ""
+        self.his_len = his_len
+        self.his = np.zeros(his_len)
         self.pprev = 0
         self.wsep = False
         self.csep = False
@@ -18,9 +21,9 @@ class MorseDecoderRegen:
         self.ecounts = [0 for x in range(self.max_ele)] # Morse elements
         self.estarts = [0 for x in range(self.max_ele)] # Identified element start
         self.nb_char_samples = 0
-        self.dit_l = 0.8*1.2
-        self.dit_h = 2.2*1.2
-        self.dah_l = 2.6*1.2
+        self.dit_l = 1.375 # 11
+        self.dit_h = 2.875 # 23
+        self.dah_l = 3.125 # 25
         print("MorseDecoderRegen.__init__:", self.dit_l*dit_len, self.dit_h*dit_len, self.dah_l*dit_len)
 
     def set_dit_len(self, dit_len):
@@ -28,6 +31,9 @@ class MorseDecoderRegen:
 
     def set_thr(self, thr):
         self.thr = thr
+
+    def reset_hist(self):
+        self.his = np.zeros(self.his_len)
 
     def new_sample(self, sample):
         """ Takes one temporal sample element which is an array of:
@@ -43,6 +49,8 @@ class MorseDecoderRegen:
             if s >= self.thr:
                 if i < 2:
                     self.scounts[i] += 1
+                    if i == 1:
+                        self.ecounts[0] = 0
                 else:
                     self.estarts[i-2] = self.nb_char_samples
             else:
@@ -55,6 +63,7 @@ class MorseDecoderRegen:
             if i >= 2:
                 self.ecounts[i-2] += s
             if i == 0 and self.scounts[0] > 0.8*self.dit_len and not self.csep: # character separator
+                self.his = np.concatenate((self.his[self.max_ele:],self.ecounts))
                 self.env_char = [0 for x in range(self.nb_char_samples)] # initialize envelope for character period
                 morsestr = ""
                 for ip in range(self.max_ele):
@@ -64,7 +73,7 @@ class MorseDecoderRegen:
                         self.env_char[start:start+zl] = zl*[1]
                         #print(f'dit {start} for {zl}')
                         morsestr += "."
-                    elif self.ecounts[ip] > self.dah_l*self.dit_len: # dah
+                    elif self.ecounts[ip] >= self.dah_l*self.dit_len: # dah
                         start = self.estarts[ip]
                         zl = int(self.ecounts[ip] * 0.75)
                         sl = int(self.ecounts[ip] * 0.55)
