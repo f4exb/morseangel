@@ -1,6 +1,6 @@
 ![MorseAngel banner](doc/img/morseangel_banner.png)
 
-<h1>Deep Neural Networks for Morse decoding</h1>
+<h1>Deep Neural Network for Morse decoding</h1>
 
 This is a Python3 application Based on PyQt5 for the GUI and PyTorch for the Deep Neural Network. Its purpose is to decode Morse code from the sound coming from an audio device.
 
@@ -104,9 +104,11 @@ The decoded text from Morse audio appears here
 
 <h3>H: Element length histogram</h3>
 
-This is the histogram of element lengths over the length of one character. Clearly there are 3 accumulations from lower to higher (left to right):
+This is the histogram of element lengths over the length of one character. It is reset at every audio input rate or WPM change. So to reset counts you may just move the WPM slider (D.1) back and forth.
 
-  - Garbage
+Clearly there are 3 accumulations from lower to higher (left to right):
+
+  - Garbage which consists mainly in residual amplitudes of elements not present
   - Dits
   - Dahs
 
@@ -126,14 +128,17 @@ On strong signals the skill of the operator can also be measured in the shape of
 
 This view displays the time lines of the Neural Network output. There are 7 time lines with the corresponding legend:
 
-  - **in**: input signal
-  - **cs**: character separator
-  - **ws**: word separator
-  - **e0**: first Morse element (dit or dah)
-  - **e1**: second Morse element
-  - **e2**: third Morse element
-  - **e3**: fourth Morse element
-  - **e4**: fifth Morse element
+  - Lower line:
+    - **in**: input signal
+  - Middle lines:
+    - **cs**: character separator
+    - **ws**: word separator
+  - Top lines:
+    - **e0**: first Morse element (dit or dah)
+    - **e1**: second Morse element
+    - **e2**: third Morse element
+    - **e3**: fourth Morse element
+    - **e4**: fifth Morse element
 
 Morse characters are decomposed in their constituting elements (the "dits" and the "dahs") that is the "on" periods of the On Off Keying (OOK) signal. The purpose of the NN model is to classify these elements by their relative position in the Morse elements sequence from the start of the character. It has also (of course) to identify the periods of silence into character and word separators. It is not necessary and in fact detrimental to identify the silence between Morse elements. It is limited to 5 Morse elements that is alphanumeric characters plus a few special characters such as `+`, `/` and `=`.
 

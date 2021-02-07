@@ -197,7 +197,7 @@ class MplHistCanvas(FigureCanvasQTAgg):
         self.axes = self.fig.add_subplot(111)
         self.axes.grid(which='both', color="gray")
         self.ylim = 50
-        self.xlim = 50
+        self.xlim = 40
         self.axes.set_ylim(0, self.ylim)
         self.axes.set_xlim(0, self.xlim)
         lditl = mlines.Line2D([11,11], [0,self.ylim], color="red", linestyle="--")
@@ -355,7 +355,7 @@ class MainWindow(QtWidgets.QMainWindow):
     def initTEnv(self):
         tenv_size = (self.audio_rate//(self.nfft-self.noverlap)) * 4
         self.sc_tenv.set_mp(tenv_size)
-        print(f"Init tenv {tenv_size}")
+        #print(f"Init tenv {tenv_size}")
 
     def initZEnv(self):
         zenv_size = 50
@@ -403,7 +403,7 @@ class MainWindow(QtWidgets.QMainWindow):
         self.audio_nsamples = self.audio_rate//2
         self.nfft, self.noverlap = fft_optim(Fs=self.audio_rate, code_speed=self.wpm)
         self.fftLabel.setText(f'FFT {self.nfft} OVL {self.noverlap}')
-        print(f"FFT {self.nfft} with overlap {self.noverlap}")
+        #print(f"FFT {self.nfft} with overlap {self.noverlap}")
         self.sc_time.set_mp(self.audio_nsamples)
         self.sc_peak.set_mp()
         self.audio_input.setBufferSize(self.audio_nsamples)
@@ -419,7 +419,7 @@ class MainWindow(QtWidgets.QMainWindow):
             data = np.frombuffer(buffer_bytes, dtype=np.single)
             if max(data) > 0:
                 #print(type(data), data.shape)
-                data /= max(data)
+                data /= max(max(data), -min(data))
                 # data /= (max(data)/2.0)
                 # data[data > 1] = 1
                 # data[data < -1] = -1

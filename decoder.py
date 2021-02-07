@@ -49,7 +49,7 @@ class MorseDecoderRegen:
             if s >= self.thr:
                 if i < 2:
                     self.scounts[i] += 1
-                    if i == 1:
+                    if i == 1 and self.scounts[i] >= 0.8*self.dit_l:
                         self.ecounts[0] = 0
                 else:
                     self.estarts[i-2] = self.nb_char_samples
