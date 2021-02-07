@@ -241,6 +241,7 @@ class MainWindow(QtWidgets.QMainWindow):
         self.noverlap = 183
         self.nperseg = 256
         self.thr = 1e-9
+        self.thr_count = 0
         self.pred_len = 0
         self.predictions = predictions.Predictions()
         self.script_dir = os.path.dirname(os.path.realpath(__file__))
@@ -433,6 +434,11 @@ class MainWindow(QtWidgets.QMainWindow):
                     f, s = periodogram(self.peak_signal, self.audio_rate, 'blackman', self.nfft_peak, 'linear', False, scaling='spectrum')
                     threshold = max(s)*0.9
                     if threshold > self.thr:
+                        self.thr_count = 1
+                    else:
+                        if self.thr_count > 0:
+                            self.thr_count -= 1
+                    if self.thr_count > 0:
                         maxtab, mintab = peakdet(abs(s[0:int(len(s)/2-1)]), threshold, f[0:int(len(f)/2-1)])
                         tone = maxtab[0,0]
                         #print(f'tone: {tone} thr: {(10.0 * np.log10(threshold)):.2f} dB')
