@@ -4,7 +4,7 @@
 
 This is a Python3 application Based on PyQt5 for the GUI and PyTorch for the Deep Neural Network. Its purpose is to decode Morse code from the sound coming from an audio device.
 
-At this stage the model (and thus the "program") is far from working satisfactorily. I cannot spend much more time on this since I already dedicated a lot of time to reach this point. However this is Open Source and contributors are welcome to continue the work, bring enhancements or take a different route to obtain better results. I hope the present materials can serve as a base.
+At this stage the model (and thus the "program") shows signs of working although has room for improvement. I cannot spend much more time on this since I already dedicated a lot of time to reach this point. However this is Open Source and contributors are welcome to continue the work and bring enhancements. I hope the present materials can serve as a base.
 
 Details on the Neural Network (NN) are given in paragraph H of the Usage section.
 

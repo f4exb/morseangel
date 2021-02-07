@@ -1,4 +1,4 @@
-import sys
+import os, sys
 import queue
 from PyQt5 import QtCore, QtWidgets, QtGui, QtMultimedia
 from PyQt5.QtGui import QPalette, QColor, QTextCursor
@@ -243,7 +243,8 @@ class MainWindow(QtWidgets.QMainWindow):
         self.thr = 1e-9
         self.pred_len = 0
         self.predictions = predictions.Predictions()
-        self.predictions.load_model("models/default.model")
+        self.script_dir = os.path.dirname(os.path.realpath(__file__))
+        self.predictions.load_model(os.path.join(self.script_dir, "models", "default.model"))
         self.dataq = queue.Queue()
         self.predworker = predworker.PredictionsWorker(self.predictions, self.dataq)
         self.predthread = QThread(self)
@@ -279,6 +280,7 @@ class MainWindow(QtWidgets.QMainWindow):
 
     def initUI(self):
         plt.style.use('dark_background')
+        self.setWindowIcon(QtGui.QIcon(os.path.join(self.script_dir, 'doc', 'img', 'MorseAngel_icon.png')))
         exitAct = QtWidgets.QAction('&Exit', self)
         exitAct.setShortcut('Ctrl+Q')
         exitAct.triggered.connect(self.quitApplication)
