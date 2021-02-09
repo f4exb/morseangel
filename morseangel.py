@@ -173,10 +173,11 @@ class MplPeakCanvas(FigureCanvasQTAgg):
         self.spec_line = None
         super(MplPeakCanvas, self).__init__(self.fig)
 
-    def set_mp(self):
+    def set_mp(self, audio_rate):
         if self.spec_line:
             self.axes.lines.pop(0)
         self.spec_line = None
+        self.axes.set_xlim(0, audio_rate/2)
 
     def new_data(self, f, s, maxtab, tone):
         if not self.spec_line:
@@ -408,7 +409,7 @@ class MainWindow(QtWidgets.QMainWindow):
         self.fftLabel.setText(f'FFT {self.nfft} OVL {self.noverlap}')
         #print(f"FFT {self.nfft} with overlap {self.noverlap}")
         self.sc_time.set_mp(self.audio_nsamples)
-        self.sc_peak.set_mp()
+        self.sc_peak.set_mp(self.audio_rate)
         self.audio_input.setBufferSize(self.audio_nsamples)
         self.initTEnv()
         self.audio_buffer = self.audio_input.start()
