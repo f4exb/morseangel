@@ -1,0 +1,44 @@
+Reshaping training signal with 2 sample moving average low-pass via convolution:
+
+    filt_len = 2
+    win = np.ones(filt_len)/(filt_len+1)
+    signal = np.apply_along_axis(lambda m: np.convolve(m, win, mode='full'), axis=0, arr=signal) # low pass with moving average convolution to make it more realistic
+    signal= signal[:-filt_len+1]
+    signal[signal > 1.0] = 1.0 # a bit crap ...
+    return envelope, signal, label_df, n_prev
+
+loading model morse_ord36e96_mm04t2_model as pre-trained model
+
+lr = 1e-5
+final:   2 epochs loss: 0.02525
+CPU times: user 3min 13s, sys: 2.78 s, total: 3min 15s
+Wall time: 3min 15s
+
+final:   2 epochs loss: 0.02291
+CPU times: user 3min 13s, sys: 2.33 s, total: 3min 16s
+Wall time: 3min 16s
+
+lr = 5e-6
+final:   2 epochs loss: 0.02242
+CPU times: user 3min 13s, sys: 2.21 s, total: 3min 15s
+Wall time: 3min 15s
+
+final:   2 epochs loss: 0.02209
+CPU times: user 3min 13s, sys: 1.87 s, total: 3min 15s
+Wall time: 3min 15s
+
+lr = 2e-6
+final:   2 epochs loss: 0.02181
+CPU times: user 3min 13s, sys: 2.19 s, total: 3min 15s
+Wall time: 3min 15s
+
+final:   2 epochs loss: 0.02180
+CPU times: user 3min 15s, sys: 1.79 s, total: 3min 17s
+Wall time: 3min 17s
+
+7.68 21.12 24.96
+127 IFU DE F4EX5 B R TNX RPT ES INFO ALEX = RIG IS FTDX120_ PWR 100W AN_ IS YAGI = LX IS SUNNY ES WARM 32C = HW AR F5SFU IE F4EXB A
+
+10.0 21.0 22.0
+127 IFU DE F4EX5 = R TNX RPT ES INFO ALEX = RIG ES FTDX120_ PWR 100W ANT IS YAGI = LX IS SUNNY ES WARM 32C = HW AR F5SFU DE F4EXB K
+
