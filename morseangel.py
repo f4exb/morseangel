@@ -101,8 +101,8 @@ class MplTimeCanvas(FigureCanvasQTAgg):
         nb_samples = len(data)
         plotdata = np.roll(plotdata, -nb_samples, axis=0)
         plotdata[-nb_samples:] = data
-        ymin = min(data)
-        ymax = max(data)
+        ymin = min(plotdata)
+        ymax = max(plotdata)
         self.axes.set_ylim(ymin*1.2, ymax*1.2)
         self.time_line.set_data(self.time_vect, plotdata)
         if zoom_span:
@@ -243,6 +243,7 @@ class MainWindow(QtWidgets.QMainWindow):
         self.nperseg = 256
         self.thr = 1e-9
         self.thr_count = 0
+        self.img_norm = 1
         self.pred_len = 0
         self.predictions = predictions.Predictions()
         self.script_dir = os.path.dirname(os.path.realpath(__file__))
@@ -329,6 +330,8 @@ class MainWindow(QtWidgets.QMainWindow):
         # line 3
         hbo3 = QtWidgets.QHBoxLayout()
         self.textbox = QtWidgets.QTextEdit(self)
+        font = QtGui.QFont("Monospace")
+        self.textbox.setFont(font)
         self.sc_hist = MplHistCanvas(self, width=5, height=2, dpi=100)
         hbo3.addWidget(self.textbox, 2)
         hbo3.addWidget(self.sc_hist, 1)
@@ -435,7 +438,7 @@ class MainWindow(QtWidgets.QMainWindow):
                     f, s = periodogram(self.peak_signal, self.audio_rate, 'blackman', self.nfft_peak, 'linear', False, scaling='spectrum')
                     threshold = max(s)*0.9
                     if threshold > self.thr:
-                        self.thr_count = 1
+                        self.thr_count = 2
                     else:
                         if self.thr_count > 0:
                             self.thr_count -= 1
@@ -449,7 +452,9 @@ class MainWindow(QtWidgets.QMainWindow):
                         #print(t.shape, f)
                         if len(f) != 0:
                             img_line = np.sum(img, axis=0)
-                            img_line /= (max(img_line)/1.5)
+                            if threshold > self.thr: # update scaling factor if signal present
+                                self.img_norm = max(img_line)/1.5
+                            img_line /= self.img_norm
                             img_line[img_line > 1] = 1
                             if len(img_line) != self.pred_len:
                                 self.pred_len = len(img_line)
